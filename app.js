@@ -288,11 +288,6 @@ function clearCart(){
 
 // ======= Login / Profile =======
 
-const ADMIN_ACCOUNT = {
-   email: 'admin@smartmeal.com',
-   password: 'admin123'
-};
-
 function doLogin(){
 
   const email = document.getElementById('email')?.value?.trim();
@@ -301,21 +296,21 @@ function doLogin(){
 
   if(!email || !pass){ alert('Enter email and password'); return; }
 
-  if(email === ADMIN_ACCOUNT.email && pass === ADMIN_ACCOUNT.password){
-       localStorage.setItem('smartmeal_admin', JSON.stringify(ADMIN_ACCOUNT));
-       alert('Logged in as Admin');
-       location.href = 'admin.html';
-       return;
-   }
-   const user = { email };
-   localStorage.setItem('smartmeal_user', JSON.stringify(user));
-   alert('Logged in as ' + email);
-   location.href = 'profile.html';
+  if(!email.includes('@')){ alert('Enter a valid email'); return; }
+
+  const user = { email };
+
+  saveUser(user);
+
+  toast('Logged in as ' + email);
+
+  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
+
 }
 
 function demoLogin(){
 
-  const user = { email: 'student@university.edu' };
+  const user = { email: 'user@ocmt.edu.edu' };
 
   saveUser(user);
 
@@ -344,50 +339,7 @@ function updateProfileLink(){
   const link = document.getElementById('profileLink');
 
   if(link) link.innerText = user ? user.email.split('@')[0] : 'Account';
-
-}
-
-// ======= Profile & Orders Rendering =======
-
-function renderProfile(){
-
-  const box = document.getElementById('profileBox');
-
-  if(!box) return;
-
-  const user = getUser();
-
-  if(!user){ box.innerHTML = '<p>Please <a href="login.html">login</a> to see your profile.</p>'; return; }
-
-  box.innerHTML = `<p><strong>Email:</strong> ${user.email}</p>`;
-
-  const orders = getOrders().filter(o=> o.user === user.email);
-
-  const history = document.getElementById('orderHistory');
-
-  if(history){
-
-    history.innerHTML = '';
-
-    if(orders.length===0) history.innerHTML = '<p>No previous orders.</p>';
-
-    orders.forEach(o=>{
-
-      const div = document.createElement('div');
-
-      div.className = 'card';
-
-      div.style.marginBottom='8px';
-
-      div.innerHTML = `<strong>Order #${o.id}</strong><div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div><div>Total: ${o.total.toFixed(2)} OMR</div><div>Status: ${o.status}</div>`;
-
-      history.appendChild(div);
-
-    });
-
-  }
-
-}
+ 
 
 // ======= Admin Simulation =======
 
@@ -403,58 +355,47 @@ function renderAdmin(){
 
     if(!list) return;
 
-    const orders = JSON.parse(localStorage.getItem('smartmeal_orders')||'[]');
+    const orders = getOrders();
 
-    list.innerHTML = '';
+  list.innerHTML = '';
 
-    if(orders.length===0) list.innerHTML = '<p>No orders yet.</p>';
+  if(orders.length===0) list.innerHTML = '<p>No orders yet.</p>';
 
-    orders.forEach(o=>{
+  orders.forEach(o=>{
 
-        const div = document.createElement('div');
+    const div = document.createElement('div');
 
-        div.className = 'card';
+    div.className = 'card';
 
-        div.style.marginBottom='8px';
+    div.style.marginBottom='8px';
 
-        div.innerHTML = `
-<strong>Order #${o.id}</strong>
+    div.innerHTML = `<strong>Order #${o.id}</strong>
 <div>User: ${o.user}</div>
 <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
 <div>Total: ${o.total.toFixed(2)} OMR</div>
-<div>Status: 
-<select onchange="updateOrderStatus(${o.id}, this.value)">
-<option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
-<option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
-<option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-</select>
-</div>
+<div>Status: <select onchange="updateOrderStatus(${o.id}, this.value)"><option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option><option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option><option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option></select></div>`;
 
-        `;
+    list.appendChild(div);
 
-        list.appendChild(div);
-
-    });
+  });
 
 }
 
 function updateOrderStatus(orderId, status){
 
-    const orders = JSON.parse(localStorage.getItem('smartmeal_orders')||'[]');
+  const orders = getOrders();
 
-    const idx = orders.findIndex(o=>o.id===orderId);
+  const idx = orders.findIndex(o=>o.id===orderId);
 
-    if(idx===-1) return;
+  if(idx===-1) return;
 
-    orders[idx].status = status;
+  orders[idx].status = status;
 
-    localStorage.setItem('smartmeal_orders', JSON.stringify(orders));
+  saveOrders(orders);
 
-    renderAdmin();
+  renderAdmin();
 
-    alert('Order status updated');
-
-}
+  toast('Order status updated');
  
 
 // ======= Utilities =======
