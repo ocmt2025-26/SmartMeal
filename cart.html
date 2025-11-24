@@ -1,30 +1,52 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>My Cart - SmartMeal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartMeal - Cart</title>
 <link rel="stylesheet" href="styles.css">
-<script src="script.js"></script>
 </head>
 <body>
-<header>
-<h2>SmartMeal</h2>
-<nav>
+<header class="site-header">
+<div class="brand">
+<div class="logo-box">🏫</div>
+<div>
+<h1>SmartMeal</h1>
+<p class="subtitle">University Cafeteria</p>
+</div>
+</div>
+<nav class="nav">
 <a href="index.html">Home</a>
 <a href="menu.html">Menu</a>
-<a href="cart.html">Cart</a>
-<a href="profile.html">Account</a>
+<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+<a href="profile.html" id="profileLink">Account</a>
 </nav>
 </header>
-<h1 style="text-align:center;">My Cart</h1>
-<div id="cartItems" style="padding:20px;"></div>
-<h2 style="text-align:center;">Total: <span id="totalPrice">0</span> OMR</h2>
-<div style="text-align:center; margin-top:20px;">
-<select id="payment">
-<option>Cash on Delivery</option>
+<main class="container fade-in">
+<h2>Your Cart</h2>
+<div id="cartContainer" class="cart-container"></div>
+<div class="cart-summary">
+<div>Subtotal: <span id="subtotal">0.00</span> OMR</div>
+<div>Delivery: <span id="delivery">0.00</span> OMR</div>
+<div class="total">Total: <span id="total">0.00</span> OMR</div>
+<div class="payment">
+<label for="paymentMethod">Payment:</label>
+<select id="paymentMethod">
+<option value="cod">Cash on Delivery</option>
+<option value="card">Card (simulated)</option>
 </select>
-<button class="main-btn" onclick="confirmOrder()">Confirm Order</button>
 </div>
-<footer>Contact Us | Terms & Conditions</footer>
+<div class="actions">
+<button class="btn primary" onclick="confirmOrder()">Confirm Order ✅</button>
+<button class="btn ghost" onclick="clearCart()">Clear Cart</button>
+</div>
+</div>
+</main>
+<footer class="site-footer">
+<div>Contact: cafeteria@university.edu</div>
+<div>© SmartMeal • Terms & Conditions</div>
+</footer>
+<script src="app.js"></script>
 </body>
 </html>
  
