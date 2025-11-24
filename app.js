@@ -2,26 +2,28 @@
 
 const MENU = [
 
-  { id: 1, name: 'Chicken Burger', price: 1.50, type: 'main' },
+  { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
 
-  { id: 2, name: 'Shawarma Sandwich', price: 1.10, type: 'main' },
+  { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
 
-  { id: 3, name: 'Black Coffee', price: 1.00, type: 'drinks' },
+  { id: 3, name: 'Black Coffee☕', price: 1.00, type: 'drinks' },
 
-  { id: 4, name: 'french Fries', price: 0.70, type: 'main' },
+  { id: 4, name: 'french Fries 🍟', price: 0.70, type: 'main' },
 
-  { id: 5, name: 'choco Cake Slice', price: 1.20, type: 'dessert' },
+  { id: 5, name: 'choco Cake Slice🍰', price: 1.20, type: 'dessert' },
 
-  { id: 6, name: 'Cookies', price: 1.00, type: 'dessert' },
+  { id: 6, name: 'Cookies🍪', price: 1.00, type: 'dessert' },
 
-  { id: 7, name: 'Karak tea', price: 0.100, type: 'drinks' },
+  { id: 7, name: 'Karak tea ☕', price: 0.100, type: 'drinks' },
 
-  { id: 8, name: 'pizza', price: 2.80, type: 'main' },
+  { id: 8, name: 'pizza🍕', price: 2.80, type: 'main' },
 
-  { id: 9, name: 'orange fresh juice', price: 1.100, type: 'drinks' },
+  { id: 9, name: 'orange fresh juice🥤', price: 1.100, type: 'drinks' },
 
-  { id: 10, name: 'mango fresh juice ', price: 1.100, type: 'drinks' }
-  
+  { id: 10, name: 'mango fresh juice 🥤', price: 1.100, type: 'drinks' },
+
+  { id: 11, name: 'ice cream 🍦', price: 0.30, type: 'dessert' }
+
 ];
 
 function getCart(){ return JSON.parse(localStorage.getItem('smartmeal_cart')||'[]'); }
