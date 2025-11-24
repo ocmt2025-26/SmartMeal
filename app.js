@@ -203,7 +203,7 @@ function calculateTotals(){
 
   const subtotal = cart.reduce((s,i)=>s + i.price * i.qty, 0);
 
-  const delivery = subtotal > 0 ? 0.30 : 0.00;
+  const delivery = subtotal > 0 ? 0.00 : 0.00;
 
   const total = subtotal + delivery;
 
