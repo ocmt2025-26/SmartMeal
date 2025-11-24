@@ -1,1 +1,186 @@
-body{font-family:Arial;}header{background:#0033A0;color:#fff;padding:15px;display:flex;justify-content:space-between;}nav a{color:#fff;margin:0 10px;text-decoration:none;}nav a:hover{color:#C8102E;}footer{text-align:center;padding:20px;background:#000;color:#fff;margin-top:40px}.main-btn{background:#0033A0;color:#fff;padding:10px 20px;border:none;border-radius:5px} .menu-container{padding:20px}.item-card{background:#eee;padding:15px;margin:10px;border-radius:10px;text-align:center}.add-btn{background:#C8102E;color:#fff;padding:8px;border:none;border-radius:5px}
+/* ===================== GENERAL ===================== */
+
+body {
+
+    font-family: Arial, sans-serif;
+
+    background: #ffffff;
+
+    margin: 0;
+
+    padding: 0;
+
+    color: #000;
+
+}
+
+header {
+
+    background: #0033A0;
+
+    color: #fff;
+
+    padding: 15px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+header a {
+
+    color: #fff;
+
+    padding: 0 10px;
+
+    text-decoration: none;
+
+    font-weight: bold;
+
+}
+
+header a:hover {
+
+    color: #C8102E;
+
+}
+
+/* MAIN BUTTON */
+
+.main-btn {
+
+    background: #0033A0;
+
+    color: #fff;
+
+    padding: 15px 25px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    margin-top: 15px;
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+}
+
+.main-btn:hover {
+
+    background: #C8102E;
+
+}
+
+/* FOOTER */
+
+footer {
+
+    background: #000;
+
+    color: #fff;
+
+    padding: 20px;
+
+    margin-top: 40px;
+
+    text-align: center;
+
+}
+
+/* MENU PAGE */
+
+.menu-container {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    padding: 25px;
+
+}
+
+.item-card {
+
+    width: 250px;
+
+    background: #f5f5f5;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    text-align: center;
+
+}
+
+.item-card img {
+
+    width: 100%;
+
+    border-radius: 10px;
+
+}
+
+.add-btn {
+
+    background: #C8102E;
+
+    padding: 10px;
+
+    border-radius: 5px;
+
+    color: #fff;
+
+    border: none;
+
+    cursor: pointer;
+
+    margin-top: 10px;
+
+}
+
+.add-btn:hover {
+
+    background: #0033A0;
+
+}
+
+/* CART */
+
+.cart-item {
+
+    background: #f7f7f7;
+
+    margin: 10px;
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+}
+
+/* ADMIN */
+
+.order-box {
+
+    background: #e6e6e6;
+
+    padding: 15px;
+
+    margin: 15px;
+
+    border-left: 5px solid #0033A0;
+
+    border-radius: 5px;
+
+}
+ 
