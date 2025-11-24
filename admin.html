@@ -1,25 +1,29 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>Admin Dashboard - SmartMeal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartMeal - Admin</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-<h2>SmartMeal - Admin</h2>
+<header class="site-header">
+<div class="brand">
+<div class="logo-box">🏫</div>
+<div>
+<h1>SmartMeal Admin</h1>
+<p class="subtitle">Cafeteria Staff Panel</p>
+</div>
+</div>
 </header>
-<h1 style="text-align:center;">New Orders</h1>
-<div class="order-box">
-<h3>Order #1023</h3>
-<p>Burger x2</p>
-<p>Status: Preparing</p>
-</div>
-<div class="order-box">
-<h3>Order #1024</h3>
-<p>Sandwich x1, Coffee x1</p>
-<p>Status: Ready</p>
-</div>
-<footer>Admin Panel | College Cafeteria</footer>
+<main class="container fade-in">
+<h2>Orders (Simulated)</h2>
+<div id="ordersList"></div>
+</main>
+<footer class="site-footer">
+<div>Contact: cafeteria@university.edu</div>
+<div>© SmartMeal</div>
+</footer>
+<script src="app.js"></script>
 </body>
 </html>
- 
