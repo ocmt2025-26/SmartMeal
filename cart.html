@@ -1,27 +1,31 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>CART</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js"></script>
+<title>My Cart - SmartMeal</title>
+<link rel="stylesheet" href="styles.css">
+<script src="script.js"></script>
 </head>
-<body onload="loadCart()">
-
+<body>
 <header>
-  <h2>🛒CART</h2>
+<h2>SmartMeal</h2>
+<nav>
+<a href="index.html">Home</a>
+<a href="menu.html">Menu</a>
+<a href="cart.html">Orders</a>
+<a href="profile.html">Account</a>
+</nav>
 </header>
-
-<div class="container">
-  <div id="cart-items"></div>
-
-  <h3>TOTAL: <span id="total">0</span> O.R</h3>
-
-  <h4>PAYMENT METHOD</h4>
-  <label><input type="radio" name="pay">CASH 💵</label><br>
-  
-  <button onclick="confirmOrder()">✅ Order confirmation</button>
+<h1 style="text-align:center;">My Cart</h1>
+<div id="cartItems" style="padding:20px;"></div>
+<h2 style="text-align:center;">Total: <span id="totalPrice">0</span> OMR</h2>
+<div style="text-align:center; margin-top:20px;">
+<select id="payment">
+<option>Cash on Delivery</option>
+<option>Online Payment</option>
+</select>
+<button class="main-btn" onclick="confirmOrder()">Confirm Order</button>
 </div>
-
+<footer>Contact Us | Terms & Conditions</footer>
 </body>
 </html>
+ 
