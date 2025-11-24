@@ -18,7 +18,7 @@ const MENU = [
 
   { id: 8, name: 'pizza', price: 2.80, type: 'main' },
 
-  { id: 9, name: 'orange juice', price: 1.100, type: 'drinks' },
+  { id: 9, name: 'orange fresh juice', price: 1.100, type: 'drinks' },
 
   { id: 10, name: 'mango fresh juice ', price: 1.100, type: 'drinks' }
   
