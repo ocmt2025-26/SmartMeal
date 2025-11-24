@@ -2,7 +2,7 @@
 
 const MENU = [
 
-  { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
+    { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
 
   { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
 
@@ -63,7 +63,8 @@ function renderMenuGrid(type='all'){
 <button class="btn primary" onclick="addToCart(${it.id})">Add to Cart</button>
 <button class="btn ghost" onclick="viewItem(${it.id})">View</button>
 </div>
-`;
+
+    `;
 
     grid.appendChild(card);
 
@@ -288,6 +289,62 @@ function clearCart(){
 
 // ======= Login / Profile =======
 
+function doLogin(){
+
+  const email = document.getElementById('email')?.value?.trim();
+
+  const pass = document.getElementById('password')?.value;
+
+  if(!email || !pass){ alert('Enter email and password'); return; }
+
+  if(!email.includes('@')){ alert('Enter a valid email'); return; }
+
+  const user = { email };
+
+  saveUser(user);
+
+  toast('Logged in as ' + email);
+
+  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
+
+}
+
+function demoLogin(){
+
+  const user = { email: 'student@ocmt.edu.om' }; 
+
+  saveUser(user);
+
+  toast('Demo login');
+
+  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
+
+}
+
+function logout(){
+
+  localStorage.removeItem('smartmeal_user');
+
+  updateProfileLink();
+
+  toast('Logged out');
+
+  if(location.pathname.endsWith('profile.html')) location.href = 'index.html';
+
+}
+
+function updateProfileLink(){
+
+  const user = getUser();
+
+  const link = document.getElementById('profileLink');
+
+  if(link) link.innerText = user ? user.email.split('@')[0] : 'Account';
+
+}
+
+// ======= Profile & Orders Rendering =======
+
 function renderProfile(){
 
   const box = document.getElementById('profileBox');
@@ -327,7 +384,6 @@ function renderProfile(){
   }
 
 }
- 
 
 // ======= Admin Simulation =======
 
@@ -337,13 +393,7 @@ function renderAdmin(){
 
   if(!list) return;
 
-  function renderAdmin(){
-
-    const list = document.getElementById('ordersList');
-
-    if(!list) return;
-
-    const orders = getOrders();
+  const orders = getOrders();
 
   list.innerHTML = '';
 
@@ -384,7 +434,8 @@ function updateOrderStatus(orderId, status){
   renderAdmin();
 
   toast('Order status updated');
- 
+
+}
 
 // ======= Utilities =======
 
