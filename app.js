@@ -2,15 +2,15 @@
 
 const MENU = [
 
-  { id: 1, name: 'Burger', price: 2.50, type: 'main', img: 'https://i.imgur.com/3ZQZ3Qx.jpeg' },
+  { id: 1, name: 'Burger', price: 2.50, type: 'main' },
 
-  { id: 2, name: 'Chicken Sandwich', price: 1.80, type: 'main', img: 'https://i.imgur.com/b1uXyQ8.jpeg' },
+  { id: 2, name: 'Chicken Sandwich', price: 1.80, type: 'main' },
 
-  { id: 3, name: 'Coffee', price: 1.00, type: 'drinks', img: 'https://i.imgur.com/0O7w1zB.jpeg' },
+  { id: 3, name: 'Coffee', price: 1.00, type: 'drinks' },
 
-  { id: 4, name: 'Fries', price: 0.90, type: 'main', img: 'https://i.imgur.com/9p0QZQk.jpeg' },
+  { id: 4, name: 'Fries', price: 0.90, type: 'main' },
 
-  { id: 5, name: 'Cake Slice', price: 1.20, type: 'dessert', img: 'https://i.imgur.com/2cOaJ9K.jpeg' }
+  { id: 5, name: 'Cake Slice', price: 1.20, type: 'dessert' }
 
 ];
 
