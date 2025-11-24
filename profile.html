@@ -1,29 +1,41 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>Profile - SmartMeal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartMeal - Profile</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-<h2>SmartMeal</h2>
-<nav>
+<header class="site-header">
+<div class="brand">
+<div class="logo-box">🏫</div>
+<div>
+<h1>SmartMeal</h1>
+<p class="subtitle">University Cafeteria</p>
+</div>
+</div>
+<nav class="nav">
 <a href="index.html">Home</a>
 <a href="menu.html">Menu</a>
-<a href="cart.html">Cart</a>
-<a href="profile.html">Account</a>
+<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+<a href="profile.html" id="profileLink">Account</a>
 </nav>
 </header>
-<section style="text-align:center; padding:20px;">
-<h1>User Profile</h1>
-<p><strong>Name:</strong> Student User</p>
-<p><strong>Email:</strong> student@ocmt.edu.om</p>
-<h3>Previous Orders</h3>
-<p>- Burger - Coffee</p>
-<p>- Sandwich</p>
-<button class="main-btn" onclick="alert('Logged out!')">Logout</button>
-</section>
-<footer>Contact Us cafeteria@ocmt.edu.om | Terms & Conditions</footer>
+<main class="container fade-in">
+<h2>Your Profile</h2>
+<div id="profileBox" class="profile-box"></div>
+<div class="actions">
+<button class="btn ghost" onclick="logout()">Logout</button>
+</div>
+<h3>Order History</h3>
+<div id="orderHistory"></div>
+</main>
+<footer class="site-footer">
+<div>Contact: cafeteria@university.edu</div>
+<div>© SmartMeal • Terms & Conditions</div>
+</footer>
+<script src="app.js"></script>
 </body>
 </html>
  
