@@ -288,6 +288,11 @@ function clearCart(){
 
 // ======= Login / Profile =======
 
+const ADMIN_ACCOUNT = {
+   email: 'admin@smartmeal.com',
+   password: 'admin123'
+};
+
 function doLogin(){
 
   const email = document.getElementById('email')?.value?.trim();
@@ -296,16 +301,16 @@ function doLogin(){
 
   if(!email || !pass){ alert('Enter email and password'); return; }
 
-  if(!email.includes('@')){ alert('Enter a valid email'); return; }
-
-  const user = { email };
-
-  saveUser(user);
-
-  toast('Logged in as ' + email);
-
-  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
-
+  if(email === ADMIN_ACCOUNT.email && pass === ADMIN_ACCOUNT.password){
+       localStorage.setItem('smartmeal_admin', JSON.stringify(ADMIN_ACCOUNT));
+       alert('Logged in as Admin');
+       location.href = 'admin.html';
+       return;
+   }
+   const user = { email };
+   localStorage.setItem('smartmeal_user', JSON.stringify(user));
+   alert('Logged in as ' + email);
+   location.href = 'profile.html';
 }
 
 function demoLogin(){
@@ -392,49 +397,65 @@ function renderAdmin(){
 
   if(!list) return;
 
-  const orders = getOrders();
+  function renderAdmin(){
 
-  list.innerHTML = '';
+    const list = document.getElementById('ordersList');
 
-  if(orders.length===0) list.innerHTML = '<p>No orders yet.</p>';
+    if(!list) return;
 
-  orders.forEach(o=>{
+    const orders = JSON.parse(localStorage.getItem('smartmeal_orders')||'[]');
 
-    const div = document.createElement('div');
+    list.innerHTML = '';
 
-    div.className = 'card';
+    if(orders.length===0) list.innerHTML = '<p>No orders yet.</p>';
 
-    div.style.marginBottom='8px';
+    orders.forEach(o=>{
 
-    div.innerHTML = `<strong>Order #${o.id}</strong>
+        const div = document.createElement('div');
+
+        div.className = 'card';
+
+        div.style.marginBottom='8px';
+
+        div.innerHTML = `
+<strong>Order #${o.id}</strong>
 <div>User: ${o.user}</div>
 <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
 <div>Total: ${o.total.toFixed(2)} OMR</div>
-<div>Status: <select onchange="updateOrderStatus(${o.id}, this.value)"><option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option><option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option><option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option></select></div>`;
+<div>Status: 
+<select onchange="updateOrderStatus(${o.id}, this.value)">
+<option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
+<option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
+<option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+</select>
+</div>
 
-    list.appendChild(div);
+        `;
 
-  });
+        list.appendChild(div);
+
+    });
 
 }
 
 function updateOrderStatus(orderId, status){
 
-  const orders = getOrders();
+    const orders = JSON.parse(localStorage.getItem('smartmeal_orders')||'[]');
 
-  const idx = orders.findIndex(o=>o.id===orderId);
+    const idx = orders.findIndex(o=>o.id===orderId);
 
-  if(idx===-1) return;
+    if(idx===-1) return;
 
-  orders[idx].status = status;
+    orders[idx].status = status;
 
-  saveOrders(orders);
+    localStorage.setItem('smartmeal_orders', JSON.stringify(orders));
 
-  renderAdmin();
+    renderAdmin();
 
-  toast('Order status updated');
+    alert('Order status updated');
 
 }
+ 
 
 // ======= Utilities =======
 
