@@ -44,16 +44,6 @@ function renderMenuGrid(type='all'){
 
     card.className = 'card';
 
-    card.innerHTML = `
-<img src="${it.img}" alt="${it.name}">
-<h3>${it.name}</h3>
-<div class="price">${it.price.toFixed(2)} OMR</div>
-<div style="display:flex;gap:8px;margin-top:8px">
-<button class="btn primary" onclick="addToCart(${it.id})">Add to Cart</button>
-<button class="btn ghost" onclick="viewItem(${it.id})">View</button>
-</div>
-
-    `;
 
     grid.appendChild(card);
 
