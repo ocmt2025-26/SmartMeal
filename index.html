@@ -1,33 +1,53 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>SmartMeal - College Cafeteria</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartMeal - Home</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-<h2>SmartMeal | College</h2>
-<nav>
+<header class="site-header">
+<div class="brand">
+<div class="logo-box">🏫</div>
+<div>
+<h1>SmartMeal</h1>
+<p class="subtitle">University Cafeteria</p>
+</div>
+</div>
+<nav class="nav">
 <a href="index.html">Home</a>
 <a href="menu.html">Menu</a>
-<a href="cart.html">Cart</a>
-<a href="profile.html">Account</a>
+<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+<a href="profile.html" id="profileLink">Account</a>
 </nav>
 </header>
-<section style="text-align:center; padding:40px;">
-<h1>Welcome to SmartMeal</h1>
-<p>Order your favorite meals from the cafeteria easily.</p>
-<button class="main-btn" onclick="window.location.href='menu.html'">
-
-        Start Ordering Now
-</button>
-<h2 style="margin-top:40px;">Popular Meals</h2>
-<p>• Burger • Sandwich • Coffee • Fries</p>
+<main class="container fade-in">
+<section class="hero">
+<div class="hero-left">
+<h2>Order fresh meals from the campus cafeteria</h2>
+<p>Fast pickup — secure payments — student discounts</p>
+<div class="actions">
+<a class="btn primary" href="menu.html">Start Ordering Now</a>
+<a class="btn ghost" href="login.html">Login</a>
+</div>
+<ul class="popular">
+<li>Burger</li>
+<li>Sandwich</li>
+<li>Coffee</li>
+<li>Fries</li>
+</ul>
+</div>
+<div class="hero-right">
+<img src="https://i.imgur.com/4ZQZ4Qy.png" alt="Cafeteria image">
+</div>
 </section>
-<footer>
-
-    Contact Us | Terms & Conditions | College Cafeteria
+</main>
+<footer class="site-footer">
+<div>Contact: cafeteria@university.edu</div>
+<div>© SmartMeal • Terms & Conditions</div>
 </footer>
+<script src="app.js"></script>
 </body>
 </html>
  
