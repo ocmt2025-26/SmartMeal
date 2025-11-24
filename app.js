@@ -288,57 +288,45 @@ function clearCart(){
 
 // ======= Login / Profile =======
 
-function doLogin(){
+function renderProfile(){
 
-  const email = document.getElementById('email')?.value?.trim();
+  const box = document.getElementById('profileBox');
 
-  const pass = document.getElementById('password')?.value;
-
-  if(!email || !pass){ alert('Enter email and password'); return; }
-
-  if(!email.includes('@')){ alert('Enter a valid email'); return; }
-
-  const user = { email };
-
-  saveUser(user);
-
-  toast('Logged in as ' + email);
-
-  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
-
-}
-
-function demoLogin(){
-
-  const user = { email: 'user@ocmt.edu.edu' };
-
-  saveUser(user);
-
-  toast('Demo login');
-
-  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
-
-}
-
-function logout(){
-
-  localStorage.removeItem('smartmeal_user');
-
-  updateProfileLink();
-
-  toast('Logged out');
-
-  if(location.pathname.endsWith('profile.html')) location.href = 'index.html';
-
-}
-
-function updateProfileLink(){
+  if(!box) return;
 
   const user = getUser();
 
-  const link = document.getElementById('profileLink');
+  if(!user){ box.innerHTML = '<p>Please <a href="login.html">login</a> to see your profile.</p>'; return; }
 
-  if(link) link.innerText = user ? user.email.split('@')[0] : 'Account';
+  box.innerHTML = `<p><strong>Email:</strong> ${user.email}</p>`;
+
+  const orders = getOrders().filter(o=> o.user === user.email);
+
+  const history = document.getElementById('orderHistory');
+
+  if(history){
+
+    history.innerHTML = '';
+
+    if(orders.length===0) history.innerHTML = '<p>No previous orders.</p>';
+
+    orders.forEach(o=>{
+
+      const div = document.createElement('div');
+
+      div.className = 'card';
+
+      div.style.marginBottom='8px';
+
+      div.innerHTML = `<strong>Order #${o.id}</strong><div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div><div>Total: ${o.total.toFixed(2)} OMR</div><div>Status: ${o.status}</div>`;
+
+      history.appendChild(div);
+
+    });
+
+  }
+
+}
  
 
 // ======= Admin Simulation =======
