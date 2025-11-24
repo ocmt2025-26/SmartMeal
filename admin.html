@@ -15,29 +15,6 @@
 <h2>Admin Dashboard</h2>
 <button onclick="adminLogout()">Logout</button>
 <div id="ordersList"></div>
-<script>
-
-const admin = JSON.parse(localStorage.getItem('smartmeal_admin'));
-
-if(!admin) location.href = 'login.html';
-
-function adminLogout(){
-
-    localStorage.removeItem('smartmeal_admin');
-
-    alert('Admin logged out');
-
-    location.href = 'login.html';
-
-}
-
-window.addEventListener('DOMContentLoaded', ()=>{
-
-    renderAdmin();
-
-});
-</script>
- 
 <header class="site-header">
 <div class="brand">
 <div class="logo-box">🏫</div>
