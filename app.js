@@ -2,15 +2,21 @@
 
 const MENU = [
 
-  { id: 1, name: 'Burger', price: 2.50, type: 'main' },
+  { id: 1, name: 'Burger', price: 1.50, type: 'main' },
 
-  { id: 2, name: 'Chicken Sandwich', price: 1.80, type: 'main' },
+  { id: 2, name: 'Chicken Sandwich', price: 1.10, type: 'main' },
 
   { id: 3, name: 'Coffee', price: 1.00, type: 'drinks' },
 
-  { id: 4, name: 'Fries', price: 0.90, type: 'main' },
+  { id: 4, name: 'Fries', price: 0.70, type: 'main' },
 
-  { id: 5, name: 'Cake Slice', price: 1.20, type: 'dessert' }
+  { id: 5, name: 'Cake Slice', price: 1.20, type: 'dessert' },
+
+  { id: 6, name: 'Cookies', price: 1.00, type: 'dessert' },
+
+  { id: 7, name: 'Karak tea', price: 0.100, type: 'drinks' },
+
+  { id: 8, name: 'Beef pizza', price: 2.80, type: 'main' }
 
 ];
 
