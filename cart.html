@@ -1,1 +1,27 @@
-<!DOCTYPE html><html><head><title>Cart</title><link rel="stylesheet" href="styles.css"><script src="script.js"></script></head><body><header><h2>SmartMeal</h2><nav><a href="index.html">Home</a><a href="menu.html">Menu</a><a href="cart.html">Orders</a><a href="profile.html">Account</a></nav></header><h1 style="text-align:center;">My Cart</h1><div id="cartItems"></div><h2>Total: <span id="totalPrice">0</span> OMR</h2><button class="main-btn" onclick="confirmOrder()">Confirm</button><footer>Contact Us</footer></body></html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>CART</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
+</head>
+<body onload="loadCart()">
+
+<header>
+  <h2>🛒CART</h2>
+</header>
+
+<div class="container">
+  <div id="cart-items"></div>
+
+  <h3>TOTAL: <span id="total">0</span> O.R</h3>
+
+  <h4>PAYMENT METHOD</h4>
+  <label><input type="radio" name="pay">CASH 💵</label><br>
+  
+  <button onclick="confirmOrder()">✅ Order confirmation</button>
+</div>
+
+</body>
+</html>
