@@ -1,40 +1,59 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SmartMeal - Login</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SmartMeal - Login</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<header class="site-header">
-<div class="brand">
-<div class="logo-box">🏫</div>
-<div>
-<h1>SmartMeal</h1>
-<p class="subtitle">College Cafeteria</p>
-</div>
-</div>
-</header>
-<main class="container fade-in">
-<h2>Login</h2>
-<div class="form">
-<label>Email (use your College email)</label>
-<input id="email" placeholder="student@ocmt.edu.om" type="email">
-<label>Password</label>
-<input id="password" placeholder="password" type="password">
-<div class="actions">
-<button class="btn primary" onclick="doLogin()">Login</button>
-<button class="btn ghost" onclick="demoLogin()">Demo Login</button>
-</div>
-<p style="font-size:13px;color:#666">Accounts are stored locally for this demo-only site.</p>
-</div>
-</main>
-<footer class="site-footer">
-<div>Contact: cafeteria@ocmt.edu.om</div>
-<div>© SmartMeal</div>
-</footer>
-<script src="app.js"></script>
+    <header class="site-header">
+        <div class="brand">
+            <div class="logo-box">🏫</div>
+            <div>
+                <h1>SmartMeal</h1>
+                <p class="subtitle">College Cafeteria</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container fade-in">
+        <h2>Register</h2>
+
+        <div class="form">
+
+            <!-- NEW INPUT FIELDS -->
+            <label>Name</label>
+            <input id="name" type="text" placeholder="Enter your name">
+
+            <label>Email (use your College email)</label>
+            <input id="email" placeholder="student@ocmt.edu.om" type="email">
+
+            <label>Password</label>
+            <input id="password" placeholder="password" type="password">
+
+            <label>Phone Number</label>
+            <input id="phone" type="text" placeholder="9xxxxxxxx">
+
+            <!-- BUTTONS (unchanged) -->
+            <div class="actions">
+                <button class="btn primary" onclick="doLogin()">Login</button>
+                <button class="btn ghost" onclick="demoLogin()">Demo Login</button>
+            </div>
+
+            <p style="font-size:13px;color:#666">Accounts are stored locally for this demo-only site.</p>
+        </div>
+
+    </main>
+
+    <footer class="site-footer">
+        <div>Contact: cafeteria@ocmt.edu.om</div>
+        <div>© SmartMeal</div>
+    </footer>
+
+    <script src="app.js"></script>
 </body>
+
 </html>
- 
