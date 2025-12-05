@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Login</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="brand">
+        <div class="logo-box">🔑</div>
+        <div>
+            <h1>Admin Login</h1>
+            <p class="subtitle">SmartMeal - Cafeteria System</p>
+        </div>
+    </div>
+</header>
+
+<main class="container fade-in">
+    <h2>Administrator Login</h2>
+
+    <div class="form" style="max-width:400px">
+
+        <label>Email</label>
+        <input id="adminEmail" type="email" placeholder="admin@ocmt.edu.om">
+
+        <label>Password</label>
+        <input id="adminPass" type="password" placeholder="••••••">
+
+        <button class="btn primary" onclick="adminLogin()">Login</button>
+
+        <p style="font-size:13px;color:#777;margin-top:10px">
+            Authorized staff only.
+        </p>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div>© SmartMeal Admin</div>
+</footer>
+
+<script src="app.js"></script>
+
+<script>
+function adminLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass = document.getElementById('adminPass').value.trim();
+
+    if (!email || !pass) {
+        alert("Please enter email and password");
+        return;
+    }
+
+    // Check admin
+    if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
+        saveUser({ email: email, name: "Admin", phone: "", isAdmin: true });
+        alert("Admin logged in");
+        location.href = "admin.html";
+        return;
+    }
+
+    alert("Invalid admin credentials");
+}
+</script>
+
+</body>
+</html>
