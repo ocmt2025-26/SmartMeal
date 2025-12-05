@@ -19,13 +19,15 @@
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
         <a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
-        <a href="profile.html" id="profileLink">Account</a>
+        <a href="#" id="profileLink">Account</a> <!-- يظهر اسم المستخدم -->
     </nav>
 </header>
 
 <main class="container fade-in">
     <h2>Orders Management</h2>
     <div id="ordersList"></div>
+
+    <!-- زر Logout دائم -->
     <button class="btn ghost" onclick="logout()">Logout</button>
 </main>
 
@@ -35,5 +37,18 @@
 </footer>
 
 <script src="app.js"></script>
+<script>
+    // تحديث الرابط ليظهر اسم Admin
+    updateProfileLink();
+
+    // تحقق من صلاحية Admin قبل عرض المحتوى
+    const user = getUser();
+    if (!user || !user.isAdmin) {
+        alert('Access denied. Admins only!');
+        location.href = 'admin-login.html';
+    } else {
+        renderAdmin();
+    }
+</script>
 </body>
 </html>
