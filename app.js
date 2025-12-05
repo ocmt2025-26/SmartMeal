@@ -350,5 +350,9 @@ window.addEventListener('DOMContentLoaded', () => {
     renderMenuGrid('all');
     renderCartPage();
     renderProfile();
-    renderAdmin();
+
+    // Render admin only on admin.html
+    if (location.pathname.endsWith('admin.html')) {
+        renderAdmin();
+    }
 });
