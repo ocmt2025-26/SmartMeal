@@ -19,14 +19,14 @@
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
         <a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
-        <a href="profile.html" id="profileLink">Account</a>
+        <a href="#" id="profileLink">Account</a>
     </nav>
 </header>
 
 <main class="container fade-in">
     <h2>Profile</h2>
     <div id="profileBox"></div>
-
+    <button class="btn ghost" onclick="logout()">Logout</button>
     <h3>Order History</h3>
     <div id="orderHistory"></div>
 </main>
@@ -37,5 +37,9 @@
 </footer>
 
 <script src="app.js"></script>
+<script>
+    updateProfileLink();
+    renderProfile();
+</script>
 </body>
 </html>
