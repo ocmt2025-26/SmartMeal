@@ -12,7 +12,7 @@
 <div class="logo-box">🏫</div>
 <div>
 <h1>SmartMeal</h1>
-<p class="subtitle">College Cafeteria</p>
+<p class="subtitle">Cart</p>
 </div>
 </div>
 <nav class="nav">
@@ -24,20 +24,12 @@
 </header>
 <main class="container fade-in">
 <h2>Your Cart</h2>
-<div id="cartContainer" class="cart-container"></div>
-<div class="cart-summary">
-<div>Subtotal: <span id="subtotal">0.00</span> OMR</div>
-<div class="total">Total: <span id="total">0.00</span> OMR</div>
-<div class="payment">
-<label for="paymentMethod">Payment:</label>
-<select id="paymentMethod">
-<option value="cod">Cash </option>
-</select>
-</div>
-<div class="actions">
-<button class="btn primary" onclick="confirmOrder()">Confirm Order ✅</button>
-<button class="btn ghost" onclick="clearCart()">Clear Cart</button>
-</div>
+<div id="cartContainer"></div>
+<div class="totals">
+<p>Subtotal: <span id="subtotal">0.00</span> OMR</p>
+<p>Delivery: <span id="delivery">0.00</span> OMR</p>
+<p>Total: <span id="total">0.00</span> OMR</p>
+<button class="btn primary" onclick="confirmOrder()">Place Order</button>
 </div>
 </main>
 <footer class="site-footer">
@@ -47,4 +39,3 @@
 <script src="app.js"></script>
 </body>
 </html>
- 
