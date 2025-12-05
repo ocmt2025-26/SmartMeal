@@ -17,6 +17,8 @@ const MENU = [
 // Admin Credentials
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
+// ======= Local Storage Helpers =======
+
 function getCart() { return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c) { localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
 
@@ -158,9 +160,6 @@ function confirmOrder() {
     if (cart.length === 0) { alert('Your cart is empty'); return; }
 
     const user = getUser();
-    if (!user) {
-        if (!confirm('You are not logged in. Continue as guest?')) return;
-    }
 
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const delivery = subtotal > 0 ? 0.30 : 0;
@@ -168,18 +167,18 @@ function confirmOrder() {
 
     const orders = getOrders();
     const order = {
-    id: Date.now(),
-    userEmail: user ? user.email : 'guest',
-    userName: user ? user.name : 'Guest',
-    userPhone: user ? user.phone : 'N/A',
-    items: cart,
-    subtotal,
-    delivery,
-    total,
-    created: new Date().toISOString(),
-    status: 'Preparing'
-};
-
+        id: Date.now(),
+        user: user ? user.email : 'guest',
+        userName: user ? user.name : null,
+        userEmail: user ? user.email : null,
+        userPhone: user ? user.phone : null,
+        items: cart,
+        subtotal,
+        delivery,
+        total,
+        created: new Date().toISOString(),
+        status: 'Preparing'
+    };
 
     orders.unshift(order);
     saveOrders(orders);
@@ -204,15 +203,12 @@ function doLogin() {
         return;
     }
 
-    // Admin login
     if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
         saveUser({ email: email, name: "Admin", phone: "", isAdmin: true });
         toast('Logged in as Admin');
         location.href = 'admin.html';
         return;
     }
-
-    if (!email.includes('@')) { alert('Enter a valid email'); return; }
 
     const user = { name, email, phone, password: pass, isAdmin: false };
     saveUser(user);
@@ -248,7 +244,75 @@ function updateProfileLink() {
     if (link) link.innerText = user ? user.email.split('@')[0] : 'Account';
 }
 
-// ======= Profile & Orders Rendering =======
+// ======= Admin Panel =======
+
+function renderAdmin() {
+    const user = getUser();
+    if (!user || !user.isAdmin) {
+        alert('Access denied. Admins only!');
+        location.href = 'index.html';
+        return;
+    }
+
+    const list = document.getElementById('ordersList');
+    if (!list) return;
+
+    const orders = getOrders();
+    list.innerHTML = '';
+
+    if (orders.length === 0) list.innerHTML = '<p>No orders yet.</p>';
+
+    orders.forEach(o => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.marginBottom = '8px';
+
+        div.innerHTML = `
+            <strong>Order #${o.id}</strong>
+            <div><strong>Name:</strong> ${o.userName || o.user || 'N/A'}</div>
+            <div><strong>Email:</strong> ${o.userEmail || o.user || 'N/A'}</div>
+            <div><strong>Phone:</strong> ${o.userPhone || 'N/A'}</div>
+            <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
+            <div>Total: ${o.total.toFixed(2)} OMR</div>
+            <div>Status: 
+                <select onchange="updateOrderStatus(${o.id}, this.value)">
+                    <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
+                    <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
+                    <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+                    <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+                </select>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function updateOrderStatus(orderId, status) {
+    const orders = getOrders();
+    const idx = orders.findIndex(o => o.id === orderId);
+    if (idx === -1) return;
+
+    orders[idx].status = status;
+    saveOrders(orders);
+    renderAdmin();
+    toast('Order status updated');
+}
+
+// ======= Utilities =======
+
+function toast(msg) { alert(msg); }
+
+// ======= Init =======
+
+window.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+    updateProfileLink();
+    renderMenuGrid('all');
+    renderCartPage();
+
+    if (location.pathname.endsWith('profile.html')) renderProfile();
+    if (location.pathname.endsWith('admin.html')) renderAdmin();
+});
 
 function renderProfile() {
     const box = document.getElementById('profileBox');
@@ -288,79 +352,3 @@ function renderProfile() {
         });
     }
 }
-
-// ======= Admin Panel =======
-
-function renderAdmin() {
-    let user = getUser();
-
-    // ======= تعديل مؤقت للسماح بالدخول =======
-    if (!user) {
-        // إنشاء أدمين تلقائي إذا لم يكن موجود
-        user = { email: "admin@ocmt.edu.om", name: "Admin", phone: "", isAdmin: true };
-        saveUser(user);
-    }
-
-    const list = document.getElementById('ordersList');
-    if (!list) return;
-
-    const orders = getOrders();
-    list.innerHTML = '';
-
-    if (orders.length === 0) list.innerHTML = '<p>No orders yet.</p>';
-
-    orders.forEach(o => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.style.marginBottom = '8px';
-
-        div.innerHTML = `
-    <strong>Order #${o.id}</strong>
-    <div><strong>Name:</strong> ${o.userName}</div>
-    <div><strong>Email:</strong> ${o.userEmail}</div>
-    <div><strong>Phone:</strong> ${o.userPhone}</div>
-    <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
-    <div>Total: ${o.total.toFixed(2)} OMR</div>
-    <div>Status: 
-        <select onchange="updateOrderStatus(${o.id}, this.value)">
-            <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
-            <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
-            <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-            <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
-        </select>
-    </div>
-`;
-
-        list.appendChild(div);
-    });
-}
-
-function updateOrderStatus(orderId, status) {
-    const orders = getOrders();
-    const idx = orders.findIndex(o => o.id === orderId);
-    if (idx === -1) return;
-
-    orders[idx].status = status;
-    saveOrders(orders);
-    renderAdmin();
-    toast('Order status updated');
-}
-
-// ======= Utilities =======
-
-function toast(msg) { alert(msg); }
-
-// ======= Init =======
-
-window.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
-    updateProfileLink();
-    renderMenuGrid('all');
-    renderCartPage();
-    renderProfile();
-
-    // Render admin only on admin.html
-    if (location.pathname.endsWith('admin.html')) {
-        renderAdmin();
-    }
-});
