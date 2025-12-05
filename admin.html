@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
 <header class="site-header">
     <div class="brand">
         <div class="logo-box">🏫</div>
@@ -15,21 +16,70 @@
             <p class="subtitle">Cafeteria Staff Panel</p>
         </div>
     </div>
-    <nav>
-        <button onclick="logout()">Logout</button>
-    </nav>
 </header>
 
 <main class="container fade-in">
-    <h2>Orders Management</h2>
-    <div id="ordersList"></div>
+
+    <!-- ADMIN LOGIN BOX -->
+    <div id="adminLoginBox" class="form" style="max-width:400px;display:none;margin-top:20px;">
+        <h2>Admin Login</h2>
+
+        <label>Email</label>
+        <input id="adminEmail" type="email" placeholder="admin@ocmt.edu.om">
+
+        <label>Password</label>
+        <input id="adminPass" type="password" placeholder="••••••">
+
+        <button class="btn primary" onclick="doAdminLogin()">Login</button>
+
+        <p style="font-size:13px;color:#777;margin-top:10px">Admins only.</p>
+    </div>
+
+    <!-- ORDERS PAGE (hidden until admin logs in) -->
+    <div id="ordersPanel" style="display:none;">
+        <h2>Orders Management</h2>
+        <div id="ordersList"></div>
+
+        <div class="actions" style="margin-top:20px;">
+            <button onclick="logout()" class="btn ghost">Logout</button>
+        </div>
+    </div>
+
 </main>
 
 <footer class="site-footer">
-    <div>Contact: cafeteria@ocmt.edu.om</div>
     <div>© SmartMeal</div>
 </footer>
 
 <script src="app.js"></script>
+
+<script>
+function doAdminLogin() {
+    const email = adminEmail.value.trim();
+    const pass = adminPass.value.trim();
+
+    if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
+        saveUser({ email, name: "Admin", phone: "", isAdmin: true });
+        loadAdminPanel();
+    } else {
+        alert("Incorrect admin credentials");
+    }
+}
+
+function loadAdminPanel() {
+    const user = getUser();
+    if (user && user.isAdmin) {
+        document.getElementById("adminLoginBox").style.display = "none";
+        document.getElementById("ordersPanel").style.display = "block";
+        renderAdmin();
+    } else {
+        document.getElementById("adminLoginBox").style.display = "block";
+        document.getElementById("ordersPanel").style.display = "none";
+    }
+}
+
+window.onload = loadAdminPanel;
+</script>
+
 </body>
 </html>
