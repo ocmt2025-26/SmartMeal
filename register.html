@@ -8,31 +8,37 @@
 </head>
 <body>
 <header class="site-header">
-  <div class="brand">
-    <div class="logo-box">🏫</div>
-    <div>
-      <h1>SmartMeal</h1>
-      <p class="subtitle">College Cafeteria</p>
-    </div>
-  </div>
+<div class="brand">
+<div class="logo-box">🏫</div>
+<div>
+<h1>SmartMeal</h1>
+<p class="subtitle">Register</p>
+</div>
+</div>
+<nav class="nav">
+<a href="index.html">Home</a>
+<a href="login.html">Login</a>
+</nav>
 </header>
-
 <main class="container fade-in">
-  <h2>Register</h2>
-  <form id="registerForm">
-    <label>Name</label>
-    <input type="text" id="registerName" required>
-    <label>Email</label>
-    <input type="email" id="registerEmail" required>
-    <label>Password</label>
-    <input type="password" id="registerPassword" required>
-    <label>Phone</label>
-    <input type="text" id="registerPhone" required>
-    <button type="submit">Register</button>
-  </form>
-  <p>Already have an account? <a href="login.html">Login here</a></p>
+<h2>Create Account</h2>
+<form id="registerForm" onsubmit="event.preventDefault(); registerUser();">
+<label>Name</label>
+<input type="text" id="regName" placeholder="Your Name" required>
+<label>Email</label>
+<input type="email" id="regEmail" placeholder="Your College Email" required>
+<label>Password</label>
+<input type="password" id="regPassword" placeholder="Password" required>
+<label>Phone Number</label>
+<input type="tel" id="regPhone" placeholder="Phone Number" required>
+<button class="btn primary" type="submit">Register</button>
+<p id="registerError" style="color:red;"></p>
+</form>
 </main>
-
+<footer class="site-footer">
+<div>Contact: cafeteria@ocmt.edu.om</div>
+<div>© SmartMeal • Terms & Conditions</div>
+</footer>
 <script src="app.js"></script>
 </body>
 </html>
