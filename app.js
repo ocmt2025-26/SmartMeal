@@ -315,19 +315,22 @@ function renderAdmin() {
         div.style.marginBottom = '8px';
 
         div.innerHTML = `
-            <strong>Order #${o.id}</strong>
-            <div>User: ${o.user}</div>
-            <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
-            <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Status: 
-                <select onchange="updateOrderStatus(${o.id}, this.value)">
-                    <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
-                    <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
-                    <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-                    <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
-                </select>
-            </div>
-        `;
+    <strong>Order #${o.id}</strong>
+    <div><strong>Name:</strong> ${o.userName}</div>
+    <div><strong>Email:</strong> ${o.userEmail}</div>
+    <div><strong>Phone:</strong> ${o.userPhone}</div>
+    <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
+    <div>Total: ${o.total.toFixed(2)} OMR</div>
+    <div>Status: 
+        <select onchange="updateOrderStatus(${o.id}, this.value)">
+            <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
+            <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
+            <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+            <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+        </select>
+    </div>
+`;
+
         list.appendChild(div);
     });
 }
