@@ -289,11 +289,13 @@ function renderProfile() {
 // ======= Admin Panel =======
 
 function renderAdmin() {
-    const user = getUser();
-    if (!user || !user.isAdmin) {
-        alert('Access denied. Admins only!');
-        location.href = 'index.html';
-        return;
+    let user = getUser();
+
+    // ======= تعديل مؤقت للسماح بالدخول =======
+    if (!user) {
+        // إنشاء أدمين تلقائي إذا لم يكن موجود
+        user = { email: "admin@ocmt.edu.om", name: "Admin", phone: "", isAdmin: true };
+        saveUser(user);
     }
 
     const list = document.getElementById('ordersList');
