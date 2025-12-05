@@ -1,85 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SmartMeal - Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Panel - SmartMeal</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+h1 { text-align: center; margin-bottom: 20px; color: #0033A0; }
+button.logout { display: block; margin: 0 auto 20px auto; background: #e74c3c; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+button.logout:hover { background: #c0392b; }
+
+#ordersList { display: flex; flex-direction: column; gap: 15px; }
+
+.card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.card div { margin: 5px 0; }
+
+.status-select { padding: 5px; border-radius: 5px; }
+.status-Preparing { color: #e67e22; font-weight: bold; }
+.status-Ready { color: #27ae60; font-weight: bold; }
+.status-Completed { color: #2980b9; font-weight: bold; }
+.status-Delivered { color: #8e44ad; font-weight: bold; }
+</style>
 </head>
 <body>
-
-<header class="site-header">
-    <div class="brand">
-        <div class="logo-box">🏫</div>
-        <div>
-            <h1>SmartMeal Admin</h1>
-            <p class="subtitle">Cafeteria Staff Panel</p>
-        </div>
-    </div>
-</header>
-
-<main class="container fade-in">
-
-    <!-- ADMIN LOGIN BOX -->
-    <div id="adminLoginBox" class="form" style="max-width:400px;display:none;margin-top:20px;">
-        <h2>Admin Login</h2>
-
-        <label>Email</label>
-        <input id="adminEmail" type="email" placeholder="admin@ocmt.edu.om">
-
-        <label>Password</label>
-        <input id="adminPass" type="password" placeholder="••••••">
-
-        <button class="btn primary" onclick="doAdminLogin()">Login</button>
-
-        <p style="font-size:13px;color:#777;margin-top:10px">Admins only.</p>
-    </div>
-
-    <!-- ORDERS PAGE (hidden until admin logs in) -->
-    <div id="ordersPanel" style="display:none;">
-        <h2>Orders Management</h2>
-        <div id="ordersList"></div>
-
-        <div class="actions" style="margin-top:20px;">
-            <button onclick="logout()" class="btn ghost">Logout</button>
-        </div>
-    </div>
-
-</main>
-
-<footer class="site-footer">
-    <div>© SmartMeal</div>
-</footer>
+<h1>Orders Management</h1>
+<button class="logout" onclick="logout()">Logout</button>
+<div id="ordersList">
+    <!-- Orders will be injected here by app.js -->
+</div>
 
 <script src="app.js"></script>
-
 <script>
-function doAdminLogin() {
-    const email = adminEmail.value.trim();
-    const pass = adminPass.value.trim();
-
-    if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
-        saveUser({ email, name: "Admin", phone: "", isAdmin: true });
-        loadAdminPanel();
-    } else {
-        alert("Incorrect admin credentials");
-    }
-}
-
-function loadAdminPanel() {
+function renderAdmin() {
     const user = getUser();
-    if (user && user.isAdmin) {
-        document.getElementById("adminLoginBox").style.display = "none";
-        document.getElementById("ordersPanel").style.display = "block";
-        renderAdmin();
-    } else {
-        document.getElementById("adminLoginBox").style.display = "block";
-        document.getElementById("ordersPanel").style.display = "none";
+    if (!user || !user.isAdmin) {
+        alert('Access denied. Admins only!');
+        location.href = 'index.html';
+        return;
     }
+
+    const list = document.getElementById('ordersList');
+    const orders = getOrders();
+    list.innerHTML = '';
+
+    if (orders.length === 0) {
+        list.innerHTML = '<p>No orders yet.</p>';
+        return;
+    }
+
+    orders.forEach(o => {
+        const div = document.createElement('div');
+        div.className = 'card';
+
+        div.innerHTML = `
+            <div><strong>Order #${o.id}</strong></div>
+            <div><strong>Name:</strong> ${o.userName || 'N/A'}</div>
+            <div><strong>Email:</strong> ${o.userEmail}</div>
+            <div><strong>Phone:</strong> ${o.userPhone || 'N/A'}</div>
+            <div><strong>Items:</strong> ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
+            <div><strong>Total:</strong> ${o.total.toFixed(2)} OMR</div>
+            <div>Status: 
+                <select class="status-select status-${o.status}" onchange="updateOrderStatus(${o.id}, this.value)">
+                    <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
+                    <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
+                    <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+                    <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+                </select>
+            </div>
+        `;
+        list.appendChild(div);
+    });
 }
-
-window.onload = loadAdminPanel;
+window.addEventListener('DOMContentLoaded', () => {
+    renderAdmin();
+});
 </script>
-
 </body>
 </html>
