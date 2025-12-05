@@ -8,27 +8,39 @@
 </head>
 <body>
 <header class="site-header">
-  <div class="brand">
-    <div class="logo-box">🏫</div>
-    <div>
-      <h1>SmartMeal</h1>
-      <p class="subtitle">College Cafeteria</p>
-    </div>
-  </div>
+<div class="brand">
+<div class="logo-box">🏫</div>
+<div>
+<h1>SmartMeal</h1>
+<p class="subtitle">Login Page</p>
+</div>
+</div>
+<nav class="nav">
+<a href="index.html">Home</a>
+<a href="menu.html">Menu</a>
+<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+<a href="profile.html" id="profileLink">Account</a>
+</nav>
 </header>
-
 <main class="container fade-in">
-  <h2>Login</h2>
-  <form id="loginForm">
-    <label>Email</label>
-    <input type="email" id="loginEmail" required>
-    <label>Password</label>
-    <input type="password" id="loginPassword" required>
-    <button type="submit">Login</button>
-  </form>
-  <p>Don't have an account? <a href="register.html">Register here</a></p>
+<h2>Login / Register</h2>
+<form id="loginForm" onsubmit="event.preventDefault(); doLogin();">
+<label>Name</label>
+<input type="text" id="name" placeholder="Your Name">
+<label>Email</label>
+<input type="email" id="email" placeholder="Your College Email" required>
+<label>Password</label>
+<input type="password" id="password" placeholder="Password" required>
+<label>Phone</label>
+<input type="text" id="phone" placeholder="Phone Number">
+<button class="btn primary" type="submit">Login</button>
+</form>
+<p>Or try demo login: <button class="btn ghost" onclick="demoLogin()">Demo Login</button></p>
 </main>
-
+<footer class="site-footer">
+<div>Contact: cafeteria@ocmt.edu.om</div>
+<div>© SmartMeal • Terms & Conditions</div>
+</footer>
 <script src="app.js"></script>
 </body>
 </html>
