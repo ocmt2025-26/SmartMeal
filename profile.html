@@ -1,41 +1,70 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SmartMeal - Profile</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SmartMeal - Profile</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<header class="site-header">
-<div class="brand">
-<div class="logo-box">🏫</div>
-<div>
-<h1>SmartMeal</h1>
-<p class="subtitle">College Cafeteria</p>
-</div>
-</div>
-<nav class="nav">
-<a href="index.html">Home</a>
-<a href="menu.html">Menu</a>
-<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
-<a href="profile.html" id="profileLink">Account</a>
-</nav>
-</header>
-<main class="container fade-in">
-<h2>Your Profile</h2>
-<div id="profileBox" class="profile-box"></div>
-<div class="actions">
-<button class="btn ghost" onclick="logout()">Logout</button>
-</div>
-<h3>Order History</h3>
-<div id="orderHistory"></div>
-</main>
-<footer class="site-footer">
-<div>Contact: cafeteria@ocmt.edu.om</div>
-<div>© SmartMeal • Terms & Conditions</div>
-</footer>
-<script src="app.js"></script>
+
+    <header class="site-header">
+        <div class="brand">
+            <div class="logo-box">🏫</div>
+            <div>
+                <h1>SmartMeal</h1>
+                <p class="subtitle">College Cafeteria</p>
+            </div>
+        </div>
+
+        <nav class="nav">
+            <a href="index.html">Home</a>
+            <a href="menu.html">Menu</a>
+            <a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+            <a href="profile.html" id="profileLink">Account</a>
+        </nav>
+    </header>
+
+    <main class="container fade-in">
+
+        <h2>Your Profile</h2>
+
+        <div class="profile-box">
+            <p><strong>Name:</strong> <span id="pName"></span></p>
+            <p><strong>Email:</strong> <span id="pEmail"></span></p>
+            <p><strong>Phone:</strong> <span id="pPhone"></span></p>
+        </div>
+
+        <div class="actions">
+            <button class="btn ghost" onclick="logout()">Logout</button>
+        </div>
+
+    </main>
+
+    <footer class="site-footer">
+        <div>Contact: cafeteria@ocmt.edu.om</div>
+        <div>© SmartMeal • Terms & Conditions</div>
+    </footer>
+
+    <script>
+        // جلب بيانات المستخدم من التخزين المحلي
+        const user = JSON.parse(localStorage.getItem("smartmeal_user"));
+
+        if (user) {
+            document.getElementById("pName").textContent = user.name;
+            document.getElementById("pEmail").textContent = user.email;
+            document.getElementById("pPhone").textContent = user.phone;
+        }
+
+        // زر تسجيل الخروج
+        function logout() {
+            localStorage.removeItem("smartmeal_user");
+            window.location.href = "login.html";
+        }
+    </script>
+
 </body>
+
 </html>
- 
