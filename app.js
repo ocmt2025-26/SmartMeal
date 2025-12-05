@@ -17,8 +17,7 @@ const MENU = [
 // Admin Credentials
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
-// ======= Local Storage Helpers =======
-
+// ======= LocalStorage Helpers =======
 function getCart() { return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c) { localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
 
@@ -29,7 +28,6 @@ function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') ||
 function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
 
 // ======= Menu Rendering =======
-
 function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
@@ -65,7 +63,6 @@ function viewItem(id) {
 }
 
 // ======= Cart Functions =======
-
 function addToCart(id) {
     const it = MENU.find(m => m.id === id);
     if (!it) return;
@@ -154,12 +151,14 @@ function calculateTotals() {
 }
 
 // ======= Checkout & Orders =======
-
 function confirmOrder() {
     const cart = getCart();
     if (cart.length === 0) { alert('Your cart is empty'); return; }
 
     const user = getUser();
+    if (!user) {
+        if (!confirm('You are not logged in. Continue as guest?')) return;
+    }
 
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const delivery = subtotal > 0 ? 0.30 : 0;
@@ -168,10 +167,9 @@ function confirmOrder() {
     const orders = getOrders();
     const order = {
         id: Date.now(),
-        user: user ? user.email : 'guest',
-        userName: user ? user.name : null,
-        userEmail: user ? user.email : null,
-        userPhone: user ? user.phone : null,
+        userName: user ? user.name : 'Guest',
+        userEmail: user ? user.email : 'guest',
+        userPhone: user ? user.phone : '',
         items: cart,
         subtotal,
         delivery,
@@ -191,7 +189,6 @@ function confirmOrder() {
 }
 
 // ======= Login / Profile =======
-
 function doLogin() {
     const name = document.getElementById('name')?.value?.trim();
     const email = document.getElementById('email')?.value?.trim();
@@ -203,12 +200,15 @@ function doLogin() {
         return;
     }
 
+    // Admin login
     if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
         saveUser({ email: email, name: "Admin", phone: "", isAdmin: true });
         toast('Logged in as Admin');
         location.href = 'admin.html';
         return;
     }
+
+    if (!email.includes('@')) { alert('Enter a valid email'); return; }
 
     const user = { name, email, phone, password: pass, isAdmin: false };
     saveUser(user);
@@ -244,8 +244,47 @@ function updateProfileLink() {
     if (link) link.innerText = user ? user.email.split('@')[0] : 'Account';
 }
 
-// ======= Admin Panel =======
+// ======= Profile & Orders Rendering =======
+function renderProfile() {
+    const box = document.getElementById('profileBox');
+    if (!box) return;
 
+    const user = getUser();
+    if (!user) {
+        box.innerHTML = '<p>Please <a href="login.html">login</a> to see your profile.</p>';
+        return;
+    }
+
+    box.innerHTML = `
+        <p><strong>Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Phone:</strong> ${user.phone}</p>
+    `;
+
+    const history = document.getElementById('orderHistory');
+    const orders = getOrders().filter(o => o.userEmail === user.email);
+
+    if (history) {
+        history.innerHTML = '';
+        if (orders.length === 0) history.innerHTML = '<p>No previous orders.</p>';
+
+        orders.forEach(o => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.style.marginBottom = '8px';
+
+            div.innerHTML = `
+                <strong>Order #${o.id}</strong>
+                <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
+                <div>Total: ${o.total.toFixed(2)} OMR</div>
+                <div>Status: ${o.status}</div>
+            `;
+            history.appendChild(div);
+        });
+    }
+}
+
+// ======= Admin Panel =======
 function renderAdmin() {
     const user = getUser();
     if (!user || !user.isAdmin) {
@@ -269,8 +308,8 @@ function renderAdmin() {
 
         div.innerHTML = `
             <strong>Order #${o.id}</strong>
-            <div><strong>Name:</strong> ${o.userName || o.user || 'N/A'}</div>
-            <div><strong>Email:</strong> ${o.userEmail || o.user || 'N/A'}</div>
+            <div><strong>Name:</strong> ${o.userName || 'N/A'}</div>
+            <div><strong>Email:</strong> ${o.userEmail}</div>
             <div><strong>Phone:</strong> ${o.userPhone || 'N/A'}</div>
             <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
@@ -299,56 +338,17 @@ function updateOrderStatus(orderId, status) {
 }
 
 // ======= Utilities =======
-
 function toast(msg) { alert(msg); }
 
 // ======= Init =======
-
 window.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     updateProfileLink();
     renderMenuGrid('all');
     renderCartPage();
+    renderProfile();
 
-    if (location.pathname.endsWith('profile.html')) renderProfile();
-    if (location.pathname.endsWith('admin.html')) renderAdmin();
+    if (location.pathname.endsWith('admin.html')) {
+        renderAdmin();
+    }
 });
-
-function renderProfile() {
-    const box = document.getElementById('profileBox');
-    if (!box) return;
-
-    const user = getUser();
-    if (!user) {
-        box.innerHTML = '<p>Please <a href="login.html">login</a> to see your profile.</p>';
-        return;
-    }
-
-    box.innerHTML = `
-        <p><strong>Name:</strong> ${user.name}</p>
-        <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Phone:</strong> ${user.phone}</p>
-    `;
-
-    const history = document.getElementById('orderHistory');
-    const orders = getOrders().filter(o => o.user === user.email);
-
-    if (history) {
-        history.innerHTML = '';
-        if (orders.length === 0) history.innerHTML = '<p>No previous orders.</p>';
-
-        orders.forEach(o => {
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.style.marginBottom = '8px';
-
-            div.innerHTML = `
-                <strong>Order #${o.id}</strong>
-                <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
-                <div>Total: ${o.total.toFixed(2)} OMR</div>
-                <div>Status: ${o.status}</div>
-            `;
-            history.appendChild(div);
-        });
-    }
-}
