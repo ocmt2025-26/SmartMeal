@@ -168,15 +168,18 @@ function confirmOrder() {
 
     const orders = getOrders();
     const order = {
-        id: Date.now(),
-        user: user ? user.email : 'guest',
-        items: cart,
-        subtotal,
-        delivery,
-        total,
-        created: new Date().toISOString(),
-        status: 'Preparing'
-    };
+    id: Date.now(),
+    userEmail: user ? user.email : 'guest',
+    userName: user ? user.name : 'Guest',
+    userPhone: user ? user.phone : 'N/A',
+    items: cart,
+    subtotal,
+    delivery,
+    total,
+    created: new Date().toISOString(),
+    status: 'Preparing'
+};
+
 
     orders.unshift(order);
     saveOrders(orders);
