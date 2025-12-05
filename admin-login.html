@@ -1,68 +1,86 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin Login</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            background:#f2f2f2;
+            font-family:Arial, sans-serif;
+        }
+        .login-box {
+            background:white;
+            padding:30px;
+            border-radius:8px;
+            box-shadow:0 0 10px rgba(0,0,0,0.2);
+            width:300px;
+        }
+        .login-box h2 {
+            text-align:center;
+            margin-bottom:20px;
+        }
+        .login-box input {
+            width:100%;
+            padding:10px;
+            margin:10px 0;
+            border:1px solid #ccc;
+            border-radius:4px;
+        }
+        .login-box button {
+            width:100%;
+            padding:10px;
+            margin-top:10px;
+            border:none;
+            background:#007BFF;
+            color:white;
+            font-size:16px;
+            border-radius:4px;
+            cursor:pointer;
+        }
+        .login-box button:hover {
+            background:#0056b3;
+        }
+    </style>
 </head>
 <body>
 
-<header class="site-header">
-    <div class="brand">
-        <div class="logo-box">🔑</div>
-        <div>
-            <h1>Admin Login</h1>
-            <p class="subtitle">SmartMeal - Cafeteria System</p>
-        </div>
-    </div>
-</header>
-
-<main class="container fade-in">
-    <h2>Administrator Login</h2>
-
-    <div class="form" style="max-width:400px">
-
-        <label>Email</label>
-        <input id="adminEmail" type="email" placeholder="admin@ocmt.edu.om">
-
-        <label>Password</label>
-        <input id="adminPass" type="password" placeholder="••••••">
-
-        <button class="btn primary" onclick="adminLogin()">Login</button>
-
-        <p style="font-size:13px;color:#777;margin-top:10px">
-            Authorized staff only.
-        </p>
-    </div>
-</main>
-
-<footer class="site-footer">
-    <div>© SmartMeal Admin</div>
-</footer>
-
-<script src="app.js"></script>
+<div class="login-box">
+    <h2>Admin Login</h2>
+    <input type="email" id="adminEmail" placeholder="Email">
+    <input type="password" id="adminPassword" placeholder="Password">
+    <button onclick="adminLogin()">Login</button>
+</div>
 
 <script>
-function adminLogin() {
-    const email = document.getElementById('adminEmail').value.trim();
-    const pass = document.getElementById('adminPass').value.trim();
+    const ADMIN_CREDENTIALS = {
+        email: "admin@ocmt.edu.om",
+        password: "admin123"
+    };
 
-    if (!email || !pass) {
-        alert("Please enter email and password");
-        return;
+    function adminLogin() {
+        const email = document.getElementById('adminEmail').value.trim();
+        const password = document.getElementById('adminPassword').value.trim();
+
+        if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+            // حفظ المستخدم كأدمن في localStorage
+            localStorage.setItem('smartmeal_user', JSON.stringify({
+                email: email,
+                name: 'Admin',
+                phone: '',
+                isAdmin: true
+            }));
+            alert('Login successful!');
+            window.location.href = 'admin.html';
+        } else {
+            alert('Incorrect email or password!');
+        }
     }
-
-    // Check admin
-    if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
-        saveUser({ email: email, name: "Admin", phone: "", isAdmin: true });
-        alert("Admin logged in");
-        location.href = "admin.html";
-        return;
-    }
-
-    alert("Invalid admin credentials");
-}
 </script>
 
 </body>
