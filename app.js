@@ -174,14 +174,12 @@ function doLogin(){
         alert('Please fill all fields!'); return;
     }
 
-    // Admin login
     if(email===ADMIN_CREDENTIALS.email && pass===ADMIN_CREDENTIALS.password){
         saveUser({ email: email, name: "Admin", phone:"", isAdmin:true });
         toast('Logged in as Admin');
         location.href='admin.html'; return;
     }
 
-    // Regular user
     const user={name,email,phone,password:pass,isAdmin:false};
     saveUser(user);
     toast('Logged in as '+email);
@@ -268,7 +266,6 @@ function renderAdmin(){
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
                     <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
                     <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-                    <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
                 </select>
             </div>
         `;
@@ -286,9 +283,26 @@ function updateOrderStatus(orderId, status){
     renderAdmin();
     toast('Order status updated');
 
-    // تحديث مباشرة عند المستخدم إن كان مفتوح
     const statusSpan = document.getElementById(`status-${orderId}`);
     if(statusSpan) statusSpan.innerText = status;
+}
+
+// ======= Custom =======
+function clearCart() {
+    localStorage.removeItem("smartmeal_cart");
+    renderCartPage();
+    updateCartCount();
+    alert("Cart has been cleared!");
+}
+
+function cancelOrder() {
+    const confirmCancel = confirm("Are you sure you want to cancel the order?");
+    if (confirmCancel) {
+        localStorage.removeItem("smartmeal_cart");
+        updateCartCount();
+        renderCartPage();
+        window.location.href = "menu.html";
+    }
 }
 
 // ======= Utilities =======
@@ -303,7 +317,6 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderProfile();
     if(location.pathname.endsWith('admin.html')) renderAdmin();
 
-    // تحديث أوتوماتيكي لحالات الطلبات كل 2 ثانية (في profile)
     setInterval(()=>{
         const user = getUser();
         if(!user || user.isAdmin) return;
