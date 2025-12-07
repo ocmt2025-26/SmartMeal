@@ -230,6 +230,7 @@ function renderProfile(){
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
+            ${o.status === "Preparing" || o.status === "Ready" ? `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order ❌</button>` : ''}
         `;
         history.appendChild(div);
     });
@@ -266,6 +267,7 @@ function renderAdmin(){
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
                     <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
                     <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+                    <option value="Cancelled by User" ${o.status==='Cancelled by User'?'selected':''}>Cancelled by User</option>
                 </select>
             </div>
         `;
@@ -295,14 +297,30 @@ function clearCart() {
     alert("Cart has been cleared!");
 }
 
-function cancelOrder() {
+function cancelOrder(orderId) {
     const confirmCancel = confirm("Are you sure you want to cancel the order?");
-    if (confirmCancel) {
-        localStorage.removeItem("smartmeal_cart");
-        updateCartCount();
+    if (!confirmCancel) return;
+
+    const orders = getOrders();
+    const idx = orders.findIndex(o => o.id === orderId);
+    if(idx !== -1){
+        orders[idx].status = "Cancelled by User";
+        saveOrders(orders);
+
+        const statusSpan = document.getElementById(`status-${orderId}`);
+        if(statusSpan) statusSpan.innerText = "Cancelled by User";
+
+        alert(`Order #${orderId} has been cancelled.`);
+        renderProfile();
         renderCartPage();
-        window.location.href = "menu.html";
+        updateCartCount();
+        return;
     }
+
+    localStorage.removeItem("smartmeal_cart");
+    renderCartPage();
+    updateCartCount();
+    window.location.href = "menu.html";
 }
 
 // ======= Utilities =======
