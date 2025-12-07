@@ -225,36 +225,32 @@ function renderProfile(){
         const div = document.createElement('div');
         div.className='card';
         div.style.marginBottom='8px';
+
+        let cancelBtn = '';
+        if(o.status !== 'Cancelled' && o.status !== 'Completed') {
+            cancelBtn = `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order ❌</button>`;
+        }
+
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
+            ${cancelBtn}
         `;
-
-        if(o.status !== 'Cancelled by User'){
-            const btn = document.createElement('button');
-            btn.className='btn ghost';
-            btn.style.marginTop='6px';
-            btn.innerText = 'Cancel Order ❌';
-            btn.onclick = () => {
-                if(confirm('Are you sure you want to cancel this order?')){
-                    o.status = 'Cancelled by User';
-                    const allOrders = getOrders();
-                    const idx = allOrders.findIndex(order => order.id === o.id);
-                    if(idx !== -1){
-                        allOrders[idx].status = o.status;
-                        saveOrders(allOrders);
-                    }
-                    renderProfile();
-                    toast('Order cancelled');
-                }
-            };
-            div.appendChild(btn);
-        }
-
         history.appendChild(div);
     });
+}
+
+function cancelOrder(orderId){
+    if(!confirm('Are you sure you want to cancel this order?')) return;
+    const orders = getOrders();
+    const idx = orders.findIndex(o=>o.id===orderId);
+    if(idx===-1) return;
+    orders[idx].status = 'Cancelled';
+    saveOrders(orders);
+    renderProfile();
+    toast('Order cancelled');
 }
 
 // ======= Admin Panel =======
@@ -288,7 +284,7 @@ function renderAdmin(){
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
                     <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
                     <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-                    <option value="Cancelled by User" ${o.status==='Cancelled by User'?'selected':''}>Cancelled by User</option>
+                    <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
                 </select>
             </div>
         `;
@@ -316,16 +312,6 @@ function clearCart() {
     renderCartPage();
     updateCartCount();
     alert("Cart has been cleared!");
-}
-
-function cancelOrder() {
-    const confirmCancel = confirm("Are you sure you want to cancel the order?");
-    if (confirmCancel) {
-        localStorage.removeItem("smartmeal_cart");
-        updateCartCount();
-        renderCartPage();
-        window.location.href = "menu.html";
-    }
 }
 
 // ======= Utilities =======
