@@ -31,17 +31,7 @@
     <div id="profileBox"></div>
     <button class="btn ghost" onclick="logout()">Logout</button>
     <h3>Order History</h3>
-    <div id="orderHistory">
-        <div class="order-item">
-            <p>Order #12345 - 2x Burger, 1x Fries</p>
-            <p>Status: Pending</p>
-            <button class="btn danger" onclick="cancelOrder(12345)">Cancel Order ❌</button>
-        </div>
-        <div class="order-item">
-            <p>Order #12344 - 1x Pizza</p>
-            <p>Status: Delivered</p>
-        </div>
-    </div>
+    <div id="orderHistory"></div>
 </main>
 
 <footer class="site-footer">
@@ -53,12 +43,6 @@
 <script>
     updateProfileLink();
     renderProfile();
-
-    function cancelOrder(orderId) {
-        if (confirm(`Are you sure you want to cancel order #${orderId}?`)) {
-            alert(`Order #${orderId} has been cancelled.`);
-        }
-    }
 </script>
 </body>
 </html>
