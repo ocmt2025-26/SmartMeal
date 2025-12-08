@@ -39,14 +39,14 @@
 
 <script src="app.js"></script>
 <script>
-    updateProfileLink();
-    const user = getUser();
-    if (!user || !user.isAdmin) {
-        alert('Access denied. Admins only!');
-        location.href = 'admin-login.html';
-    } else {
-        renderAdmin();
-    }
+updateProfileLink();
+const user = getUser();
+if (!user || !user.isAdmin) {
+    alert('Access denied. Admins only!');
+    location.href = 'admin-login.html';
+} else {
+    renderAdmin();
+}
 </script>
 </body>
 </html>
