@@ -3,23 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SmartMeal - Admin</title>
+<title>SmartMeal - Admin Login</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="site-header">
 <div class="brand">
-<div class="logo-box"><img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg" alt="Logo"></div>
-<div><h1>SmartMeal</h1><p class="subtitle">Admin Panel</p></div>
+    <div class="logo-box">🏫</div>
+    <div>
+        <h1>SmartMeal</h1>
+        <p class="subtitle">Admin Login</p>
+    </div>
 </div>
 <nav class="nav">
-<a href="index.html" onclick="logout()">Logout</a>
+    <a href="index.html">Home</a>
 </nav>
 </header>
 
 <main class="container fade-in">
-<h2>Orders Management</h2>
-<div id="ordersContainer"></div>
+<h2>Admin Login</h2>
+<form id="adminLoginForm" onsubmit="event.preventDefault(); adminLogin();">
+    <label>Email</label>
+    <input type="email" id="adminEmail" placeholder="Admin Email" required>
+    <label>Password</label>
+    <input type="password" id="adminPassword" placeholder="Password" required>
+    <button class="btn primary" type="submit">Login</button>
+    <p id="adminLoginError" style="color:red;"></p>
+</form>
 </main>
 
 <footer class="site-footer">
@@ -27,6 +37,30 @@
 <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
+<script>
+// ===== Admin Login Function =====
+function adminLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value.trim();
+
+    // بيانات المسؤول (تطابق app.js)
+    const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
+
+    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        // حفظ بيانات المسؤول في localStorage
+        localStorage.setItem('smartmeal_user', JSON.stringify({
+            email: email,
+            name: "Admin",
+            phone: "",
+            isAdmin: true
+        }));
+        alert('Logged in as Admin');
+        location.href = 'admin.html'; // تحويل للوحة الإدارة
+    } else {
+        document.getElementById('adminLoginError').innerText = "Invalid email or password!";
+    }
+}
+</script>
+
 </body>
 </html>
