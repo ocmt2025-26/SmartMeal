@@ -25,7 +25,7 @@ function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const items = MENU.filter(i => type==='all'?true:i.type===type);
+    const items = MENU.filter(i => type === 'all' ? true : i.type === type);
     items.forEach(it => {
         const card = document.createElement('div');
         card.className = 'card';
@@ -43,43 +43,43 @@ function renderMenuGrid(type = 'all') {
 
 function filterType(type, el) {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    if(el) el.classList.add('active');
+    if (el) el.classList.add('active');
     renderMenuGrid(type);
 }
 
 function viewItem(id) {
-    const it = MENU.find(m => m.id===id);
-    if(!it) return;
+    const it = MENU.find(m => m.id === id);
+    if (!it) return;
     alert(it.name + '\nPrice: ' + it.price.toFixed(2) + ' OMR');
 }
 
 function addToCart(id) {
-    const it = MENU.find(m => m.id===id);
-    if(!it) return;
+    const it = MENU.find(m => m.id === id);
+    if (!it) return;
     const cart = getCart();
-    const existing = cart.find(c=>c.id===id);
-    if(existing) existing.qty +=1;
+    const existing = cart.find(c => c.id === id);
+    if (existing) existing.qty += 1;
     else cart.push({ id: it.id, name: it.name, price: it.price, qty: 1 });
     saveCart(cart);
-    toast(it.name+' added to cart');
+    toast(it.name + ' added to cart');
 }
 
 function updateCartCount() {
     const cart = getCart();
-    const count = cart.reduce((s,i)=>s+i.qty,0);
+    const count = cart.reduce((s, i) => s + i.qty, 0);
     const el = document.getElementById('cartCount');
-    if(el) el.innerText = count;
+    if (el) el.innerText = count;
 }
 
 function renderCartPage() {
     const container = document.getElementById('cartContainer');
-    if(!container) return;
+    if (!container) return;
     const cart = getCart();
     container.innerHTML = '';
-    if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; return; }
-    cart.forEach((item,idx)=>{
+    if (cart.length === 0) { container.innerHTML = '<p>Your cart is empty.</p>'; return; }
+    cart.forEach((item, idx) => {
         const div = document.createElement('div');
-        div.className='cart-item';
+        div.className = 'cart-item';
         div.innerHTML = `
             <div>
                 <strong>${item.name}</strong><br>
@@ -97,45 +97,44 @@ function renderCartPage() {
     calculateTotals();
 }
 
-function changeQty(index, delta){
+function changeQty(index, delta) {
     const cart = getCart();
-    if(!cart[index]) return;
+    if (!cart[index]) return;
     cart[index].qty += delta;
-    if(cart[index].qty<1) cart.splice(index,1);
+    if (cart[index].qty < 1) cart.splice(index, 1);
     saveCart(cart);
     renderCartPage();
 }
 
-function removeItem(index){
+function removeItem(index) {
     const cart = getCart();
-    if(!cart[index]) return;
-    cart.splice(index,1);
+    if (!cart[index]) return;
+    cart.splice(index, 1);
     saveCart(cart);
     renderCartPage();
 }
 
-function calculateTotals(){
+function calculateTotals() {
     const cart = getCart();
-    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = 0;
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const total = subtotal;
     const elSub = document.getElementById('subtotal');
     const elTot = document.getElementById('total');
-    if(elSub) elSub.innerText=subtotal.toFixed(2);
-    if(elTot) elTot.innerText=total.toFixed(2);
+    if (elSub) elSub.innerText = subtotal.toFixed(2);
+    if (elTot) elTot.innerText = total.toFixed(2);
 }
 
-function confirmOrder(){
+function confirmOrder() {
     const cart = getCart();
-    if(cart.length===0){ alert('Your cart is empty'); return; }
+    if (cart.length === 0) { alert('Your cart is empty'); return; }
+
     const user = getUser();
-    if(!user){ alert('Please login first!'); return; }
+    if (!user) { alert('Please login first!'); return; }
 
     const deliveryTimeInput = document.getElementById('deliveryTime');
     const deliveryTime = deliveryTimeInput?.value || new Date().toLocaleTimeString();
 
-    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const total = subtotal.toFixed(2);
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
     const orders = getOrders();
     const order = {
@@ -144,177 +143,144 @@ function confirmOrder(){
         userEmail: user.email,
         userPhone: user.phone,
         items: cart,
-        subtotal,
-        delivery: 0,
-        total,
+        subtotal: subtotal,
+        total: subtotal,
         created: new Date().toISOString(),
-        deliveryTime,
+        deliveryTime: deliveryTime,
         status: 'Preparing'
     };
 
     orders.unshift(order);
     saveOrders(orders);
+
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
     renderProfile();
     renderAdmin();
-    toast('Order placed! It will be ready at '+deliveryTime+'.');
+
+    toast("Order placed!");
 }
 
-function doLogin(){
+function doLogin() {
     const name = document.getElementById('name')?.value?.trim();
     const email = document.getElementById('email')?.value?.trim();
     const pass = document.getElementById('password')?.value?.trim();
     const phone = document.getElementById('phone')?.value?.trim();
 
-    if(!email||!pass||(!name&&email!==ADMIN_CREDENTIALS.email)||(!phone&&email!==ADMIN_CREDENTIALS.email)){
-        alert('Please fill all fields!'); return;
+    if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
+        saveUser({ name: "Admin", email: email, phone: "", isAdmin: true });
+        location.href = "admin.html";
+        return;
     }
 
-    if(email===ADMIN_CREDENTIALS.email && pass===ADMIN_CREDENTIALS.password){
-        saveUser({ email: email, name: "Admin", phone:"", isAdmin:true });
-        toast('Logged in as Admin');
-        location.href='admin.html'; return;
+    if (!name || !email || !pass || !phone) {
+        alert("Fill all fields");
+        return;
     }
 
-    const user={name,email,phone,password:pass,isAdmin:false};
-    saveUser(user);
-    toast('Logged in as '+email);
-    location.href='menu.html';
+    saveUser({ name, email, phone, password: pass, isAdmin: false });
+    location.href = "menu.html";
 }
 
-function logout(){
+function logout() {
     localStorage.removeItem('smartmeal_user');
-    updateProfileLink();
-    location.href='login.html';
+    location.href = 'login.html';
 }
 
-function updateProfileLink(){
+function updateProfileLink() {
     const user = getUser();
     const link = document.getElementById('profileLink');
-    if(link) link.innerText = user?user.email.split('@')[0]:'Login';
+    if (link) link.innerText = user ? user.email.split('@')[0] : "Login";
 }
 
-function renderProfile(){
+function renderProfile() {
     const box = document.getElementById('profileBox');
-    if(!box) return;
-    const user = getUser();
-    if(!user){ box.innerHTML='<p>Please <a href="login.html">login</a> to see your profile.</p>'; return; }
+    if (!box) return;
 
-    box.innerHTML=`<p><strong>Name:</strong> ${user.name}</p>
-                   <p><strong>Email:</strong> ${user.email}</p>
-                   <p><strong>Phone:</strong> ${user.phone}</p>`;
+    const user = getUser();
+    if (!user) { box.innerHTML = '<p>Please login.</p>'; return; }
+
+    box.innerHTML = `
+        <p><strong>Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Phone:</strong> ${user.phone}</p>
+    `;
 
     const history = document.getElementById('orderHistory');
-    if(!history) return;
-    history.innerHTML='';
+    if (!history) return;
 
-    const orders = getOrders().filter(o=>o.userEmail === user.email);
+    const orders = getOrders().filter(o => o.userEmail === user.email);
+    history.innerHTML = '';
 
-    if(orders.length===0){ history.innerHTML='<p>No previous orders.</p>'; return; }
+    if (orders.length === 0) {
+        history.innerHTML = '<p>No orders found.</p>';
+        return;
+    }
 
-    orders.forEach(o=>{
+    orders.forEach(o => {
         const div = document.createElement('div');
-        div.className='card';
-        div.style.marginBottom='8px';
-        const status = o.status || 'Preparing';
-        const deliveryTime = o.deliveryTime || 'Not set';
-
-        let cancelBtn = '';
-        if(status !== 'Cancelled' && status !== 'Completed') cancelBtn = `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order ❌</button>`;
-
-        div.innerHTML=`<strong>Order #${o.id}</strong>
-                       <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
-                       <div>Total: ${o.total.toFixed(2)} OMR</div>
-                       <div>Status: <span id="status-${o.id}">${status}</span></div>
-                       <div>Delivery Time: ${deliveryTime}</div>
-                       ${cancelBtn}`;
+        div.className = "card";
+        div.innerHTML = `
+            <strong>Order #${o.id}</strong>
+            <div>Items: ${o.items.map(i => i.name + " x" + i.qty).join(", ")}</div>
+            <div>Total: ${o.total.toFixed(2)} OMR</div>
+            <div>Status: ${o.status}</div>
+            <div>Delivery: ${o.deliveryTime}</div>
+        `;
         history.appendChild(div);
     });
 }
 
-function cancelOrder(orderId){
-    if(!confirm('Are you sure you want to cancel this order?')) return;
-    const orders = getOrders();
-    const idx = orders.findIndex(o=>o.id===orderId);
-    if(idx===-1) return;
-    orders[idx].status = 'Cancelled';
-    saveOrders(orders);
-    renderProfile();
-    renderAdmin();
-    toast('Order cancelled');
-}
-
-function renderAdmin(){
+function renderAdmin() {
     const user = getUser();
-    if(!user || !user.isAdmin) return;
-    const list = document.getElementById('ordersList');
-    if(!list) return;
-    const orders = getOrders();
-    list.innerHTML='';
-    if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
+    if (!user || !user.isAdmin) return;
 
-    orders.forEach(o=>{
-        const div=document.createElement('div');
-        div.className='card';
-        div.style.marginBottom='8px';
-        const status = o.status || 'Preparing';
-        const deliveryTime = o.deliveryTime || 'Not set';
-        div.innerHTML=`<strong>Order #${o.id}</strong>
-                       <div>Name: ${o.userName}</div>
-                       <div>Email: ${o.userEmail}</div>
-                       <div>Phone: ${o.userPhone}</div>
-                       <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
-                       <div>Total: ${o.total.toFixed(2)} OMR</div>
-                       <div>Delivery Time: ${deliveryTime}</div>
-                       <div>Status: 
-                           <select onchange="updateOrderStatus(${o.id}, this.value)">
-                               <option value="Preparing" ${status==='Preparing'?'selected':''}>Preparing</option>
-                               <option value="Ready" ${status==='Ready'?'selected':''}>Ready</option>
-                               <option value="Completed" ${status==='Completed'?'selected':''}>Completed</option>
-                               <option value="Cancelled" ${status==='Cancelled'?'selected':''}>Cancelled</option>
-                           </select>
-                       </div>`;
+    const list = document.getElementById('ordersList');
+    if (!list) return;
+
+    const orders = getOrders().sort((a, b) => b.id - a.id);
+    list.innerHTML = '';
+
+    orders.forEach(o => {
+        const div = document.createElement('div');
+        div.className = "card";
+        div.innerHTML = `
+            <strong>Order #${o.id}</strong>
+            <div>Name: ${o.userName}</div>
+            <div>Email: ${o.userEmail}</div>
+            <div>Phone: ${o.userPhone}</div>
+            <div>Items: ${o.items.map(i => i.name + " x" + i.qty).join(", ")}</div>
+            <div>Total: ${o.total.toFixed(2)} OMR</div>
+            <div>Delivery: ${o.deliveryTime}</div>
+            <div>Status:
+                <select onchange="updateOrderStatus(${o.id}, this.value)">
+                    <option ${o.status==="Preparing"?"selected":""}>Preparing</option>
+                    <option ${o.status==="Ready"?"selected":""}>Ready</option>
+                    <option ${o.status==="Completed"?"selected":""}>Completed</option>
+                    <option ${o.status==="Cancelled"?"selected":""}>Cancelled</option>
+                </select>
+        `;
         list.appendChild(div);
     });
 }
 
-function updateOrderStatus(orderId, status){
+function updateOrderStatus(orderId, status) {
     const orders = getOrders();
-    const idx = orders.findIndex(o=>o.id===orderId);
-    if(idx===-1) return;
+    const idx = orders.findIndex(o => o.id === orderId);
+    if (idx === -1) return;
     orders[idx].status = status;
     saveOrders(orders);
     renderAdmin();
-    renderProfile();
-    const statusSpan = document.getElementById(`status-${orderId}`);
-    if(statusSpan) statusSpan.innerText = status;
 }
 
-function clearCart() {
-    localStorage.removeItem("smartmeal_cart");
-    renderCartPage();
-    updateCartCount();
-    alert("Cart has been cleared!");
-}
+function toast(msg) { alert(msg); }
 
-function toast(msg){ alert(msg); }
-
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener("DOMContentLoaded", () => {
     updateCartCount();
     updateProfileLink();
-    renderMenuGrid('all');
+    renderMenuGrid();
     renderCartPage();
     renderProfile();
-    if(location.pathname.endsWith('admin.html')) renderAdmin();
-    setInterval(()=>{
-        const user = getUser();
-        if(!user || user.isAdmin) return;
-        const orders = getOrders().filter(o=>o.userEmail===user.email);
-        orders.forEach(o=>{
-            const statusSpan = document.getElementById(`status-${o.id}`);
-            if(statusSpan && statusSpan.innerText !== o.status) statusSpan.innerText = o.status;
-        });
-    },2000);
+    if (location.pathname.endsWith("admin.html")) renderAdmin();
 });
