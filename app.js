@@ -120,8 +120,8 @@ function removeItem(index){
 function calculateTotals(){
     const cart = getCart();
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = subtotal>0?0.30:0;
-    const total = subtotal + delivery;
+    const delivery = 0;
+    const total = subtotal;
     const elSub = document.getElementById('subtotal');
     const elDel = document.getElementById('delivery');
     const elTot = document.getElementById('total');
@@ -138,8 +138,8 @@ function confirmOrder(){
     if(!user){ alert('Please login first!'); return; }
 
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = subtotal>0?0.30:0;
-    const total = +(subtotal+delivery).toFixed(2);
+    const delivery = 0;
+    const total = subtotal.toFixed(2);
 
     const orders = getOrders();
     const order = {
@@ -257,8 +257,7 @@ function cancelOrder(orderId){
 function renderAdmin(){
     const user = getUser();
     if(!user || !user.isAdmin){
-        alert('Access denied. Admins only!');
-        location.href='login.html'; return;
+        alert('Access denied. Admins only!'); location.href='login.html'; return;
     }
 
     const list = document.getElementById('ordersList');
