@@ -1,4 +1,3 @@
-// ======= Data & Storage =======
 const MENU = [
     { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
     { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
@@ -22,7 +21,6 @@ function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify
 function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
 
-// ===== Menu Functions =====
 function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
@@ -55,51 +53,78 @@ function viewItem(id) {
     alert(it.name + '\nPrice: ' + it.price.toFixed(2) + ' OMR');
 }
 
-// ===== Cart Functions =====
 function addToCart(id) {
     const it = MENU.find(m => m.id===id);
     if(!it) return;
     const cart = getCart();
     const existing = cart.find(c=>c.id===id);
-    if(existing) existing.qty+=1;
-    else cart.push({ ...it, qty:1 });
+    if(existing) existing.qty +=1;
+    else cart.push({ id: it.id, name: it.name, price: it.price, qty: 1 });
     saveCart(cart);
-    toast(it.name + ' added to cart');
+    toast(it.name+' added to cart');
 }
 
-function updateCartCount(){
-    const c = getCart();
+function updateCartCount() {
+    const cart = getCart();
+    const count = cart.reduce((s,i)=>s+i.qty,0);
     const el = document.getElementById('cartCount');
-    if(el) el.innerText = c.reduce((s,i)=>s+i.qty,0);
+    if(el) el.innerText = count;
 }
 
-function renderCartPage(){
+function renderCartPage() {
     const container = document.getElementById('cartContainer');
     if(!container) return;
     const cart = getCart();
     container.innerHTML = '';
-    if(cart.length===0) { container.innerHTML = '<p>Your cart is empty</p>'; return; }
-    cart.forEach(i=>{
+    if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; return; }
+    cart.forEach((item,idx)=>{
         const div = document.createElement('div');
         div.className='cart-item';
-        div.innerHTML=`${i.name} x ${i.qty} = ${(i.price*i.qty).toFixed(2)} OMR
-        <button class="btn ghost" onclick="removeFromCart(${i.id})">❌</button>`;
+        div.innerHTML = `
+            <div>
+                <strong>${item.name}</strong><br>
+                ${item.price.toFixed(2)} OMR
+            </div>
+            <div class="qty">
+                <button onclick="changeQty(${idx}, -1)">-</button>
+                <div>${item.qty}</div>
+                <button onclick="changeQty(${idx}, 1)">+</button>
+                <button style="margin-left:10px" onclick="removeItem(${idx})">Remove</button>
+            </div>
+        `;
         container.appendChild(div);
     });
-    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    document.getElementById('subtotal').innerText = subtotal.toFixed(2);
-    document.getElementById('total').innerText = subtotal.toFixed(2);
+    calculateTotals();
 }
 
-function removeFromCart(id){
-    const cart = getCart().filter(c=>c.id!==id);
+function changeQty(index, delta){
+    const cart = getCart();
+    if(!cart[index]) return;
+    cart[index].qty += delta;
+    if(cart[index].qty<1) cart.splice(index,1);
     saveCart(cart);
     renderCartPage();
 }
 
-function clearCart(){ localStorage.removeItem('smartmeal_cart'); renderCartPage(); updateCartCount(); }
+function removeItem(index){
+    const cart = getCart();
+    if(!cart[index]) return;
+    cart.splice(index,1);
+    saveCart(cart);
+    renderCartPage();
+}
 
-// ===== Orders =======
+function calculateTotals(){
+    const cart = getCart();
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const delivery = 0;
+    const total = subtotal;
+    const elSub = document.getElementById('subtotal');
+    const elTot = document.getElementById('total');
+    if(elSub) elSub.innerText=subtotal.toFixed(2);
+    if(elTot) elTot.innerText=total.toFixed(2);
+}
+
 function confirmOrder(){
     const cart = getCart();
     if(cart.length===0){ alert('Your cart is empty'); return; }
@@ -107,7 +132,7 @@ function confirmOrder(){
     if(!user){ alert('Please login first!'); return; }
 
     const deliveryTimeInput = document.getElementById('deliveryTime');
-    const deliveryTime = deliveryTimeInput && deliveryTimeInput.value ? deliveryTimeInput.value : 'ASAP';
+    const deliveryTime = deliveryTimeInput?.value || new Date().toLocaleTimeString();
 
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
     const total = subtotal.toFixed(2);
@@ -137,68 +162,159 @@ function confirmOrder(){
     toast('Order placed! It will be ready at '+deliveryTime+'.');
 }
 
-// ===== User ======
 function doLogin(){
-    const name = document.getElementById('name')?.value.trim();
-    const email = document.getElementById('email')?.value.trim();
-    const password = document.getElementById('password')?.value.trim();
-    const phone = document.getElementById('phone')?.value.trim();
-    if(!email || !password){ alert('Email & Password required'); return; }
-    saveUser({ name:name||'User', email, phone:phone||'', isAdmin:false });
-    alert('Logged in as '+(name||'User'));
-    location.href='index.html';
+    const name = document.getElementById('name')?.value?.trim();
+    const email = document.getElementById('email')?.value?.trim();
+    const pass = document.getElementById('password')?.value?.trim();
+    const phone = document.getElementById('phone')?.value?.trim();
+
+    if(!email||!pass||(!name&&email!==ADMIN_CREDENTIALS.email)||(!phone&&email!==ADMIN_CREDENTIALS.email)){
+        alert('Please fill all fields!'); return;
+    }
+
+    if(email===ADMIN_CREDENTIALS.email && pass===ADMIN_CREDENTIALS.password){
+        saveUser({ email: email, name: "Admin", phone:"", isAdmin:true });
+        toast('Logged in as Admin');
+        location.href='admin.html'; return;
+    }
+
+    const user={name,email,phone,password:pass,isAdmin:false};
+    saveUser(user);
+    toast('Logged in as '+email);
+    location.href='menu.html';
 }
 
-function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); location.href='index.html'; }
+function logout(){
+    localStorage.removeItem('smartmeal_user');
+    updateProfileLink();
+    location.href='login.html';
+}
 
 function updateProfileLink(){
     const user = getUser();
-    const el = document.getElementById('profileLink');
-    if(el) el.innerText = user ? (user.isAdmin?'Admin':'Account') : 'Login';
+    const link = document.getElementById('profileLink');
+    if(link) link.innerText = user?user.email.split('@')[0]:'Login';
 }
 
-// ===== Profile =====
 function renderProfile(){
-    const user = getUser();
     const box = document.getElementById('profileBox');
     if(!box) return;
-    box.innerHTML = user ? `<p>Name: ${user.name}<br>Email: ${user.email}<br>Phone: ${user.phone}</p>` : '<p>Please login</p>';
+    const user = getUser();
+    if(!user){ box.innerHTML='<p>Please <a href="login.html">login</a> to see your profile.</p>'; return; }
+
+    box.innerHTML=`<p><strong>Name:</strong> ${user.name}</p>
+                   <p><strong>Email:</strong> ${user.email}</p>
+                   <p><strong>Phone:</strong> ${user.phone}</p>`;
 
     const history = document.getElementById('orderHistory');
-    if(history){
-        const orders = getOrders().filter(o=>o.userEmail===user?.email);
-        if(orders.length===0){ history.innerHTML='<p>No orders yet</p>'; return; }
-        history.innerHTML='';
-        orders.forEach(o=>{
-            const div = document.createElement('div');
-            div.className='order-item';
-            div.innerHTML=`<b>Order#${o.id}</b> | ${o.status} | ${o.deliveryTime}<br>
-                ${o.items.map(i=>i.name+' x '+i.qty).join('<br>')}<br>
-                Total: ${o.total} OMR`;
-            history.appendChild(div);
-        });
-    }
+    if(!history) return;
+    history.innerHTML='';
+
+    const orders = getOrders().filter(o=>o.userEmail === user.email);
+
+    if(orders.length===0){ history.innerHTML='<p>No previous orders.</p>'; return; }
+
+    orders.forEach(o=>{
+        const div = document.createElement('div');
+        div.className='card';
+        div.style.marginBottom='8px';
+        const status = o.status || 'Preparing';
+        const deliveryTime = o.deliveryTime || 'Not set';
+
+        let cancelBtn = '';
+        if(status !== 'Cancelled' && status !== 'Completed') cancelBtn = `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order ❌</button>`;
+
+        div.innerHTML=`<strong>Order #${o.id}</strong>
+                       <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+                       <div>Total: ${o.total.toFixed(2)} OMR</div>
+                       <div>Status: <span id="status-${o.id}">${status}</span></div>
+                       <div>Delivery Time: ${deliveryTime}</div>
+                       ${cancelBtn}`;
+        history.appendChild(div);
+    });
 }
 
-// ===== Admin =====
+function cancelOrder(orderId){
+    if(!confirm('Are you sure you want to cancel this order?')) return;
+    const orders = getOrders();
+    const idx = orders.findIndex(o=>o.id===orderId);
+    if(idx===-1) return;
+    orders[idx].status = 'Cancelled';
+    saveOrders(orders);
+    renderProfile();
+    renderAdmin();
+    toast('Order cancelled');
+}
+
 function renderAdmin(){
+    const user = getUser();
+    if(!user || !user.isAdmin) return;
     const list = document.getElementById('ordersList');
     if(!list) return;
     const orders = getOrders();
-    list.innerHTML = '';
+    list.innerHTML='';
+    if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
+
     orders.forEach(o=>{
-        const div = document.createElement('div');
-        div.className='order-item';
-        div.innerHTML=`<b>Order#${o.id}</b> | ${o.userName} | ${o.userEmail} | ${o.status} | ${o.deliveryTime}<br>
-            ${o.items.map(i=>i.name+' x '+i.qty).join('<br>')}<br>Total: ${o.total} OMR`;
+        const div=document.createElement('div');
+        div.className='card';
+        div.style.marginBottom='8px';
+        const status = o.status || 'Preparing';
+        const deliveryTime = o.deliveryTime || 'Not set';
+        div.innerHTML=`<strong>Order #${o.id}</strong>
+                       <div>Name: ${o.userName}</div>
+                       <div>Email: ${o.userEmail}</div>
+                       <div>Phone: ${o.userPhone}</div>
+                       <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+                       <div>Total: ${o.total.toFixed(2)} OMR</div>
+                       <div>Delivery Time: ${deliveryTime}</div>
+                       <div>Status: 
+                           <select onchange="updateOrderStatus(${o.id}, this.value)">
+                               <option value="Preparing" ${status==='Preparing'?'selected':''}>Preparing</option>
+                               <option value="Ready" ${status==='Ready'?'selected':''}>Ready</option>
+                               <option value="Completed" ${status==='Completed'?'selected':''}>Completed</option>
+                               <option value="Cancelled" ${status==='Cancelled'?'selected':''}>Cancelled</option>
+                           </select>
+                       </div>`;
         list.appendChild(div);
     });
 }
 
-// ===== Toast =====
+function updateOrderStatus(orderId, status){
+    const orders = getOrders();
+    const idx = orders.findIndex(o=>o.id===orderId);
+    if(idx===-1) return;
+    orders[idx].status = status;
+    saveOrders(orders);
+    renderAdmin();
+    renderProfile();
+    const statusSpan = document.getElementById(`status-${orderId}`);
+    if(statusSpan) statusSpan.innerText = status;
+}
+
+function clearCart() {
+    localStorage.removeItem("smartmeal_cart");
+    renderCartPage();
+    updateCartCount();
+    alert("Cart has been cleared!");
+}
+
 function toast(msg){ alert(msg); }
 
-// ===== Init =====
-updateCartCount();
-renderMenuGrid();
-renderProfile();
+window.addEventListener('DOMContentLoaded',()=>{
+    updateCartCount();
+    updateProfileLink();
+    renderMenuGrid('all');
+    renderCartPage();
+    renderProfile();
+    if(location.pathname.endsWith('admin.html')) renderAdmin();
+    setInterval(()=>{
+        const user = getUser();
+        if(!user || user.isAdmin) return;
+        const orders = getOrders().filter(o=>o.userEmail===user.email);
+        orders.forEach(o=>{
+            const statusSpan = document.getElementById(`status-${o.id}`);
+            if(statusSpan && statusSpan.innerText !== o.status) statusSpan.innerText = o.status;
+        });
+    },2000);
+});
