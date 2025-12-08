@@ -141,8 +141,6 @@ function confirmOrder(){
     const delivery = 0;
     const total = subtotal.toFixed(2);
 
-    const pickupTime = document.getElementById('pickupTime')?.value || '';
-
     const orders = getOrders();
     const order = {
         id: Date.now(),
@@ -154,8 +152,7 @@ function confirmOrder(){
         delivery,
         total,
         created: new Date().toISOString(),
-        status: 'Preparing',
-        pickupTime
+        status: 'Preparing'
     };
 
     orders.unshift(order);
@@ -240,7 +237,6 @@ function renderProfile(){
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
-            ${o.pickupTime ? `<div>Pickup Time: ${o.pickupTime}</div>` : ''}
             ${cancelBtn}
         `;
         history.appendChild(div);
@@ -283,7 +279,6 @@ function renderAdmin(){
             <div>Phone: ${o.userPhone}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Pickup Time: ${o.pickupTime || '-'}</div>
             <div>Status: 
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
