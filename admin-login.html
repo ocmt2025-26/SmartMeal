@@ -41,11 +41,9 @@
 </footer>
 
 <script>
-// ===== Admin Login Function =====
 function adminLogin() {
     const email = document.getElementById('adminEmail').value.trim();
     const password = document.getElementById('adminPassword').value.trim();
-
     const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
     if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
@@ -62,6 +60,5 @@ function adminLogin() {
     }
 }
 </script>
-
 </body>
 </html>
