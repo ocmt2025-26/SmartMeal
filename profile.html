@@ -41,6 +41,76 @@
     <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
+<script>
+function renderProfile(){
+    const box = document.getElementById('profileBox');
+    if(!box) return;
+    const user = JSON.parse(localStorage.getItem('smartmeal_user') || 'null');
+    if(!user){
+        box.innerHTML='<p>Please <a href="login.html">login</a> to see your profile.</p>';
+        return;
+    }
+
+    box.innerHTML=`
+        <p><strong>Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Phone:</strong> ${user.phone}</p>
+    `;
+
+    const history = document.getElementById('orderHistory');
+    if(!history) return;
+    history.innerHTML='';
+
+    const orders = JSON.parse(localStorage.getItem('smartmeal_orders') || '[]')
+                     .filter(o => o.userEmail === user.email);
+
+    if(orders.length===0){ history.innerHTML='<p>No previous orders.</p>'; return; }
+
+    orders.forEach(o=>{
+        const div = document.createElement('div');
+        div.className='card';
+        div.style.marginBottom='8px';
+
+        const status = o.status || 'Preparing';
+        const deliveryTime = o.deliveryTime || 'Not set';
+
+        let cancelBtn = '';
+        if(status !== 'Cancelled' && status !== 'Completed') {
+            cancelBtn = `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order ❌</button>`;
+        }
+
+        div.innerHTML=`
+            <strong>Order #${o.id}</strong>
+            <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+            <div>Total: ${o.total.toFixed(2)} OMR</div>
+            <div>Status: <span id="status-${o.id}">${status}</span></div>
+            <div>Delivery Time: ${deliveryTime}</div>
+            ${cancelBtn}
+        `;
+
+        history.appendChild(div);
+    });
+}
+
+function cancelOrder(orderId){
+    if(!confirm('Are you sure you want to cancel this order?')) return;
+    const orders = JSON.parse(localStorage.getItem('smartmeal_orders') || '[]');
+    const idx = orders.findIndex(o=>o.id===orderId);
+    if(idx===-1) return;
+    orders[idx].status = 'Cancelled';
+    localStorage.setItem('smartmeal_orders', JSON.stringify(orders));
+    renderProfile();
+    alert('Order cancelled');
+}
+
+function logout(){
+    localStorage.removeItem('smartmeal_user');
+    location.href='login.html';
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+    renderProfile();
+});
+</script>
 </body>
 </html>
