@@ -46,7 +46,7 @@
 
 .cart-container{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 
-.cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #eee}
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#fff;border-radius:8px;border:1px solid:#eee}
 
 .qty{display:flex;gap:6px;align-items:center}
 
@@ -67,4 +67,12 @@ input[type="email"],input[type="password"],input[type="text"],select{padding:10p
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 @media(max-width:800px){.hero{flex-direction:column}.hero-right img{max-width:100%}.nav{display:none}}
- 
+
+
+/* === إضافة تصغير الصور بدون تغيير أي شيء آخر === */
+.logo-box img {
+    width: 40px !important;
+    height: 40px !important;
+    object-fit: cover;
+    border-radius: 4px;
+}
