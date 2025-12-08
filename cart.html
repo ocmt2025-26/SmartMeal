@@ -7,12 +7,17 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
 <header class="site-header">
 <div class="brand">
 <div class="logo-box">
-<img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg">
+    <img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg"
+         alt="Logo" class="header-logo">
 </div>
-<div><h1>SmartMeal</h1><p class="subtitle">Cart</p></div>
+<div>
+<h1>SmartMeal</h1>
+<p class="subtitle">Cart</p>
+</div>
 </div>
 <nav class="nav">
 <a href="index.html">Home</a>
@@ -23,19 +28,22 @@
 
 <main class="container fade-in">
 <h2>Your Cart</h2>
-
-<input type="time" id="deliveryTime">
-
 <div id="cartContainer"></div>
+
+<h3>اختر وقت الاستلام</h3>
+<input type="time" id="deliveryTime" class="time-input">
+
+<h3>طريقة الدفع</h3>
+<select id="paymentMethod">
+    <option value="Cash">Cash</option>
+</select>
 
 <div class="cart-summary">
 <p>Subtotal: <span id="subtotal">0.00</span> OMR</p>
 <p>Total: <span id="total">0.00</span> OMR</p>
-
 <button class="btn primary" onclick="confirmOrder()">Confirm Order</button>
 <button class="btn ghost" onclick="clearCart()">Clear Cart</button>
 </div>
-
 </main>
 
 <footer class="site-footer">
@@ -50,6 +58,5 @@ window.onload = function () {
     updateCartCount();
 }
 </script>
-
 </body>
 </html>
