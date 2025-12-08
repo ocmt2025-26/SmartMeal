@@ -141,8 +141,6 @@ function confirmOrder(){
     const delivery = 0;
     const total = subtotal.toFixed(2);
 
-    const pickupTime = document.getElementById('pickupTime')?.value || '';
-
     const orders = getOrders();
     const order = {
         id: Date.now(),
@@ -153,7 +151,6 @@ function confirmOrder(){
         subtotal,
         delivery,
         total,
-        pickupTime,
         created: new Date().toISOString(),
         status: 'Preparing'
     };
@@ -238,7 +235,6 @@ function renderProfile(){
             <strong>Order #${o.id}</strong>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Pickup Time: ${o.pickupTime || 'Not set'}</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
             ${cancelBtn}
         `;
@@ -282,7 +278,6 @@ function renderAdmin(){
             <div>Phone: ${o.userPhone}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Pickup Time: ${o.pickupTime || 'Not set'}</div>
             <div>Status: 
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
