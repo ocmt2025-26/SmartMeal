@@ -1,3 +1,4 @@
+// ======= Data & Storage Helpers =======
 const MENU = [
     { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
     { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
@@ -21,6 +22,7 @@ function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify
 function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
 
+// ======= Menu =======
 function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
@@ -53,6 +55,7 @@ function viewItem(id) {
     alert(it.name + '\nPrice: ' + it.price.toFixed(2) + ' OMR');
 }
 
+// ======= Cart =======
 function addToCart(id) {
     const it = MENU.find(m => m.id===id);
     if(!it) return;
@@ -125,15 +128,20 @@ function calculateTotals(){
     if(elTot) elTot.innerText=total.toFixed(2);
 }
 
+// ======= Checkout & Orders =======
 function confirmOrder(){
     const cart = getCart();
     if(cart.length===0){ alert('Your cart is empty'); return; }
     const user = getUser();
     if(!user){ alert('Please login first!'); return; }
 
+    const deliveryTimeInput = document.getElementById('deliveryTime');
+    if(!deliveryTimeInput || !deliveryTimeInput.value){ alert('Please select delivery time!'); return; }
+
+    const deliveryTime = deliveryTimeInput.value;
+
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
     const total = subtotal.toFixed(2);
-    const deliveryTime = document.getElementById('deliveryTime')?.value || 'ASAP';
 
     const orders = getOrders();
     const order = {
@@ -146,8 +154,8 @@ function confirmOrder(){
         delivery: 0,
         total,
         created: new Date().toISOString(),
-        status: 'Preparing',
-        deliveryTime
+        deliveryTime,
+        status: 'Preparing'
     };
 
     orders.unshift(order);
@@ -157,9 +165,10 @@ function confirmOrder(){
     renderCartPage();
     renderProfile();
     renderAdmin();
-    toast('Order placed! It will be ready soon.');
+    toast('Order placed! It will be ready at '+deliveryTime+'.');
 }
 
+// ======= Login / Profile =======
 function doLogin(){
     const name = document.getElementById('name')?.value?.trim();
     const email = document.getElementById('email')?.value?.trim();
@@ -185,7 +194,6 @@ function doLogin(){
 function logout(){
     localStorage.removeItem('smartmeal_user');
     updateProfileLink();
-    toast('Logged out');
     location.href='login.html';
 }
 
@@ -195,6 +203,7 @@ function updateProfileLink(){
     if(link) link.innerText = user?user.email.split('@')[0]:'Login';
 }
 
+// ======= Profile & Orders =======
 function renderProfile(){
     const box = document.getElementById('profileBox');
     if(!box) return;
@@ -214,7 +223,7 @@ function renderProfile(){
     if(!history) return;
     history.innerHTML='';
 
-    const orders = getOrders().filter(o=>o.userEmail.toLowerCase() === user.email.toLowerCase());
+    const orders = getOrders().filter(o=>o.userEmail === user.email);
 
     if(orders.length===0){ history.innerHTML='<p>No previous orders.</p>'; return; }
 
@@ -224,6 +233,7 @@ function renderProfile(){
         div.style.marginBottom='8px';
 
         const status = o.status || 'Preparing';
+        const deliveryTime = o.deliveryTime || 'Not set';
 
         let cancelBtn = '';
         if(status !== 'Cancelled' && status !== 'Completed') {
@@ -235,7 +245,7 @@ function renderProfile(){
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: <span id="status-${o.id}">${status}</span></div>
-            <div>Delivery Time: ${o.deliveryTime}</div>
+            <div>Delivery Time: ${deliveryTime}</div>
             ${cancelBtn}
         `;
 
@@ -246,7 +256,7 @@ function renderProfile(){
 function cancelOrder(orderId){
     if(!confirm('Are you sure you want to cancel this order?')) return;
     const orders = getOrders();
-    const idx = orders.findIndex(o=>o.id===Number(orderId));
+    const idx = orders.findIndex(o=>o.id===orderId);
     if(idx===-1) return;
     orders[idx].status = 'Cancelled';
     saveOrders(orders);
@@ -255,6 +265,7 @@ function cancelOrder(orderId){
     toast('Order cancelled');
 }
 
+// ======= Admin Panel =======
 function renderAdmin(){
     const user = getUser();
     if(!user || !user.isAdmin) return;
@@ -263,7 +274,6 @@ function renderAdmin(){
     if(!list) return;
 
     const orders = getOrders();
-
     list.innerHTML='';
     if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
 
@@ -272,6 +282,7 @@ function renderAdmin(){
         div.className='card';
         div.style.marginBottom='8px';
         const status = o.status || 'Preparing';
+        const deliveryTime = o.deliveryTime || 'Not set';
 
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
@@ -280,7 +291,7 @@ function renderAdmin(){
             <div>Phone: ${o.userPhone}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Delivery Time: ${o.deliveryTime}</div>
+            <div>Delivery Time: ${deliveryTime}</div>
             <div>Status: 
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
                     <option value="Preparing" ${status==='Preparing'?'selected':''}>Preparing</option>
@@ -296,7 +307,7 @@ function renderAdmin(){
 
 function updateOrderStatus(orderId, status){
     const orders = getOrders();
-    const idx = orders.findIndex(o=>o.id===Number(orderId));
+    const idx = orders.findIndex(o=>o.id===orderId);
     if(idx===-1) return;
 
     orders[idx].status = status;
@@ -308,6 +319,7 @@ function updateOrderStatus(orderId, status){
     if(statusSpan) statusSpan.innerText = status;
 }
 
+// ======= Utilities =======
 function clearCart() {
     localStorage.removeItem("smartmeal_cart");
     renderCartPage();
@@ -317,6 +329,7 @@ function clearCart() {
 
 function toast(msg){ alert(msg); }
 
+// ======= Init =======
 window.addEventListener('DOMContentLoaded',()=>{
     updateCartCount();
     updateProfileLink();
