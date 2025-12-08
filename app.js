@@ -21,6 +21,36 @@ function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify
 function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
 
+function doLogin() {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const phone = document.getElementById("phone").value.trim();
+
+    if (!email || !password) {
+        alert("Please enter email and password");
+        return;
+    }
+
+    if(email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        const admin = { name: "Admin", email, isAdmin: true };
+        saveUser(admin);
+        location.href = "admin.html";
+        return;
+    }
+
+    let user = getUser();
+    if(user && user.email === email && user.password === password){
+        alert("Logged in successfully");
+        location.href = "profile.html";
+    } else {
+        const newUser = { name, email, password, phone, isAdmin: false };
+        saveUser(newUser);
+        alert("Account created and logged in!");
+        location.href = "profile.html";
+    }
+}
+
 function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
@@ -117,7 +147,6 @@ function removeItem(index){
 function calculateTotals(){
     const cart = getCart();
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = 0;
     const total = subtotal;
     const elSub = document.getElementById('subtotal');
     const elTot = document.getElementById('total');
@@ -191,4 +220,4 @@ function cancelOrder(orderId) {
     toast("Order cancelled");
 }
 
-// الباقي من الكود كما هو سابقاً (login, profile, admin, toast, renderAdmin, etc.)
+// باقي دوال profile, admin, toast, logout, updateProfileLink, registerUser كما كانت موجودة
