@@ -137,12 +137,11 @@ function confirmOrder(){
     const user = getUser();
     if(!user){ alert('Please login first!'); return; }
 
-    const pickupTime = document.getElementById('pickupTime')?.value;
-    if(!pickupTime){ alert('Please select pickup time'); return; }
-
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
     const delivery = 0;
     const total = subtotal.toFixed(2);
+
+    const pickupTime = document.getElementById('pickupTime')?.value || '';
 
     const orders = getOrders();
     const order = {
@@ -164,7 +163,8 @@ function confirmOrder(){
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
-    toast('Order placed! It will be ready at '+pickupTime);
+    renderProfile();
+    toast('Order placed! It will be ready in ~10 minutes.');
 }
 
 // ======= Login / Profile =======
@@ -221,8 +221,8 @@ function renderProfile(){
 
     const history = document.getElementById('orderHistory');
     if(!history) return;
-    history.innerHTML='';
     const orders = getOrders().filter(o=>o.userEmail===user.email);
+    history.innerHTML='';
     if(orders.length===0){ history.innerHTML='<p>No previous orders.</p>'; return; }
 
     orders.forEach(o=>{
@@ -239,8 +239,8 @@ function renderProfile(){
             <strong>Order #${o.id}</strong>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Pickup Time: ${o.pickupTime}</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
+            ${o.pickupTime ? `<div>Pickup Time: ${o.pickupTime}</div>` : ''}
             ${cancelBtn}
         `;
         history.appendChild(div);
@@ -283,7 +283,7 @@ function renderAdmin(){
             <div>Phone: ${o.userPhone}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Pickup Time: ${o.pickupTime}</div>
+            <div>Pickup Time: ${o.pickupTime || '-'}</div>
             <div>Status: 
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
