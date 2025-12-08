@@ -137,6 +137,9 @@ function confirmOrder(){
     const user = getUser();
     if(!user){ alert('Please login first!'); return; }
 
+    const pickupTime = document.getElementById('pickupTime')?.value;
+    if(!pickupTime){ alert('Please select pickup time'); return; }
+
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
     const delivery = 0;
     const total = subtotal.toFixed(2);
@@ -152,7 +155,8 @@ function confirmOrder(){
         delivery,
         total,
         created: new Date().toISOString(),
-        status: 'Preparing'
+        status: 'Preparing',
+        pickupTime
     };
 
     orders.unshift(order);
@@ -160,7 +164,7 @@ function confirmOrder(){
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
-    toast('Order placed! It will be ready in ~10 minutes.');
+    toast('Order placed! It will be ready at '+pickupTime);
 }
 
 // ======= Login / Profile =======
@@ -235,6 +239,7 @@ function renderProfile(){
             <strong>Order #${o.id}</strong>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
+            <div>Pickup Time: ${o.pickupTime}</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
             ${cancelBtn}
         `;
@@ -278,6 +283,7 @@ function renderAdmin(){
             <div>Phone: ${o.userPhone}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
+            <div>Pickup Time: ${o.pickupTime}</div>
             <div>Status: 
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
