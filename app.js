@@ -123,10 +123,8 @@ function calculateTotals(){
     const delivery = 0;
     const total = subtotal;
     const elSub = document.getElementById('subtotal');
-    const elDel = document.getElementById('delivery');
     const elTot = document.getElementById('total');
     if(elSub) elSub.innerText=subtotal.toFixed(2);
-    if(elDel) elDel.innerText=delivery.toFixed(2);
     if(elTot) elTot.innerText=total.toFixed(2);
 }
 
@@ -138,7 +136,6 @@ function confirmOrder(){
     if(!user){ alert('Please login first!'); return; }
 
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = 0;
     const total = subtotal.toFixed(2);
 
     const orders = getOrders();
@@ -149,7 +146,7 @@ function confirmOrder(){
         userPhone: user.phone,
         items: cart,
         subtotal,
-        delivery,
+        delivery: 0,
         total,
         created: new Date().toISOString(),
         status: 'Preparing'
@@ -160,8 +157,9 @@ function confirmOrder(){
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
-    renderProfile();
-    toast('Order placed! It will be ready in ~10 minutes.');
+    renderProfile();  // تحديث الطلبات للمستخدم فوراً
+    renderAdmin();    // تحديث الطلبات للادمين فوراً
+    toast('Order placed! It will be ready soon.');
 }
 
 // ======= Login / Profile =======
@@ -218,8 +216,10 @@ function renderProfile(){
 
     const history = document.getElementById('orderHistory');
     if(!history) return;
-    const orders = getOrders().filter(o=>o.userEmail===user.email);
     history.innerHTML='';
+
+    const orders = getOrders().filter(o=>o.userEmail === user.email);
+
     if(orders.length===0){ history.innerHTML='<p>No previous orders.</p>'; return; }
 
     orders.forEach(o=>{
@@ -227,8 +227,10 @@ function renderProfile(){
         div.className='card';
         div.style.marginBottom='8px';
 
+        const status = o.status || 'Preparing';
+
         let cancelBtn = '';
-        if(o.status !== 'Cancelled' && o.status !== 'Completed') {
+        if(status !== 'Cancelled' && status !== 'Completed') {
             cancelBtn = `<button class="btn danger" onclick="cancelOrder(${o.id})">Cancel Order ❌</button>`;
         }
 
@@ -236,9 +238,10 @@ function renderProfile(){
             <strong>Order #${o.id}</strong>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
-            <div>Status: <span id="status-${o.id}">${o.status}</span></div>
+            <div>Status: <span id="status-${o.id}">${status}</span></div>
             ${cancelBtn}
         `;
+
         history.appendChild(div);
     });
 }
@@ -251,6 +254,7 @@ function cancelOrder(orderId){
     orders[idx].status = 'Cancelled';
     saveOrders(orders);
     renderProfile();
+    renderAdmin();
     toast('Order cancelled');
 }
 
@@ -258,13 +262,14 @@ function cancelOrder(orderId){
 function renderAdmin(){
     const user = getUser();
     if(!user || !user.isAdmin){
-        alert('Access denied. Admins only!'); location.href='login.html'; return;
+        return;
     }
 
     const list = document.getElementById('ordersList');
     if(!list) return;
 
     const orders = getOrders();
+
     list.innerHTML='';
     if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
 
@@ -272,6 +277,8 @@ function renderAdmin(){
         const div=document.createElement('div');
         div.className='card';
         div.style.marginBottom='8px';
+        const status = o.status || 'Preparing';
+
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
             <div>Name: ${o.userName}</div>
@@ -281,10 +288,10 @@ function renderAdmin(){
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: 
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
-                    <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
-                    <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
-                    <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-                    <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+                    <option value="Preparing" ${status==='Preparing'?'selected':''}>Preparing</option>
+                    <option value="Ready" ${status==='Ready'?'selected':''}>Ready</option>
+                    <option value="Completed" ${status==='Completed'?'selected':''}>Completed</option>
+                    <option value="Cancelled" ${status==='Cancelled'?'selected':''}>Cancelled</option>
                 </select>
             </div>
         `;
@@ -300,13 +307,13 @@ function updateOrderStatus(orderId, status){
     orders[idx].status = status;
     saveOrders(orders);
     renderAdmin();
-    toast('Order status updated');
+    renderProfile();
 
     const statusSpan = document.getElementById(`status-${orderId}`);
     if(statusSpan) statusSpan.innerText = status;
 }
 
-// ======= Custom =======
+// ======= Utilities =======
 function clearCart() {
     localStorage.removeItem("smartmeal_cart");
     renderCartPage();
@@ -314,7 +321,6 @@ function clearCart() {
     alert("Cart has been cleared!");
 }
 
-// ======= Utilities =======
 function toast(msg){ alert(msg); }
 
 // ======= Init =======
