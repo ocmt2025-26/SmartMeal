@@ -120,13 +120,10 @@ function removeItem(index){
 function calculateTotals(){
     const cart = getCart();
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = 0;
     const total = subtotal;
     const elSub = document.getElementById('subtotal');
-    const elDel = document.getElementById('delivery');
     const elTot = document.getElementById('total');
     if(elSub) elSub.innerText=subtotal.toFixed(2);
-    if(elDel) elDel.innerText=delivery.toFixed(2);
     if(elTot) elTot.innerText=total.toFixed(2);
 }
 
@@ -137,9 +134,10 @@ function confirmOrder(){
     const user = getUser();
     if(!user){ alert('Please login first!'); return; }
 
+    const pickupTime = document.getElementById('pickupTime')?.value || '';
+
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const delivery = 0;
-    const total = subtotal.toFixed(2);
+    const total = +(subtotal).toFixed(2);
 
     const orders = getOrders();
     const order = {
@@ -149,8 +147,8 @@ function confirmOrder(){
         userPhone: user.phone,
         items: cart,
         subtotal,
-        delivery,
         total,
+        pickupTime,
         created: new Date().toISOString(),
         status: 'Preparing'
     };
@@ -160,7 +158,7 @@ function confirmOrder(){
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
-    toast('Order placed! It will be ready in ~10 minutes.');
+    toast('Order placed! Pickup time: ' + (pickupTime || 'Not set'));
 }
 
 // ======= Login / Profile =======
@@ -234,6 +232,7 @@ function renderProfile(){
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+            <div>Pickup Time: ${o.pickupTime || 'Not set'}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: <span id="status-${o.id}">${o.status}</span></div>
             ${cancelBtn}
@@ -257,7 +256,8 @@ function cancelOrder(orderId){
 function renderAdmin(){
     const user = getUser();
     if(!user || !user.isAdmin){
-        alert('Access denied. Admins only!'); location.href='login.html'; return;
+        alert('Access denied. Admins only!');
+        location.href='login.html'; return;
     }
 
     const list = document.getElementById('ordersList');
@@ -276,6 +276,7 @@ function renderAdmin(){
             <div>Name: ${o.userName}</div>
             <div>Email: ${o.userEmail}</div>
             <div>Phone: ${o.userPhone}</div>
+            <div>Pickup Time: ${o.pickupTime || 'Not set'}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total.toFixed(2)} OMR</div>
             <div>Status: 
