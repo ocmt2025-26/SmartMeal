@@ -304,6 +304,8 @@ function toast(msg){
     const t = document.createElement('div');
     t.className='toast';
     t.innerText=msg;
+    const existing = document.querySelector('.toast');
+    if(existing) existing.remove();
     document.body.appendChild(t);
     setTimeout(()=>{ t.remove(); },2000);
 }
@@ -316,4 +318,3 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderProfile();
     if(location.pathname.endsWith('admin.html')) renderAdmin();
 });
-
