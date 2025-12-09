@@ -21,36 +21,6 @@ function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify
 function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
 
-function doLogin() {
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const phone = document.getElementById("phone").value.trim();
-
-    if (!email || !password) {
-        alert("Please enter email and password");
-        return;
-    }
-
-    if(email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        const admin = { name: "Admin", email, isAdmin: true };
-        saveUser(admin);
-        location.href = "admin.html";
-        return;
-    }
-
-    let user = getUser();
-    if(user && user.email === email && user.password === password){
-        alert("Logged in successfully");
-        location.href = "profile.html";
-    } else {
-        const newUser = { name, email, password, phone, isAdmin: false };
-        saveUser(newUser);
-        alert("Account created and logged in!");
-        location.href = "profile.html";
-    }
-}
-
 function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
     if (!grid) return;
@@ -80,7 +50,7 @@ function filterType(type, el) {
 function viewItem(id) {
     const it = MENU.find(m => m.id===id);
     if(!it) return;
-    alert(it.name + '\nPrice: ' + it.price.toFixed(2) + ' OMR');
+    toast(it.name + " - " + it.price.toFixed(2) + " OMR");
 }
 
 function addToCart(id) {
@@ -88,10 +58,10 @@ function addToCart(id) {
     if(!it) return;
     const cart = getCart();
     const existing = cart.find(c=>c.id===id);
-    if(existing) existing.qty +=1;
+    if(existing) existing.qty+=1;
     else cart.push({ id: it.id, name: it.name, price: it.price, qty: 1 });
     saveCart(cart);
-    toast(it.name+' added to cart');
+    toast(it.name+" added to cart");
 }
 
 function updateCartCount() {
@@ -105,12 +75,12 @@ function renderCartPage() {
     const container = document.getElementById('cartContainer');
     if(!container) return;
     const cart = getCart();
-    container.innerHTML = '';
+    container.innerHTML='';
     if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; return; }
     cart.forEach((item,idx)=>{
         const div = document.createElement('div');
         div.className='cart-item';
-        div.innerHTML = `
+        div.innerHTML=`
             <div>
                 <strong>${item.name}</strong><br>
                 ${item.price.toFixed(2)} OMR
@@ -130,7 +100,7 @@ function renderCartPage() {
 function changeQty(index, delta){
     const cart = getCart();
     if(!cart[index]) return;
-    cart[index].qty += delta;
+    cart[index].qty+=delta;
     if(cart[index].qty<1) cart.splice(index,1);
     saveCart(cart);
     renderCartPage();
@@ -154,12 +124,12 @@ function calculateTotals(){
     if(elTot) elTot.innerText=total.toFixed(2);
 }
 
-function confirmOrder() {
+function confirmOrder(){
     const cart = getCart();
-    if (cart.length === 0) { alert('Your cart is empty'); return; }
+    if(cart.length===0){ toast('Your cart is empty'); return; }
 
     const user = getUser();
-    if (!user) { alert('Please login first!'); return; }
+    if(!user){ toast('Please login first'); return; }
 
     const deliveryTimeInput = document.getElementById("deliveryTime");
     const paymentMethod = document.getElementById("paymentMethod");
@@ -167,11 +137,10 @@ function confirmOrder() {
     const deliveryTime = deliveryTimeInput?.value || "Not selected";
     const payment = paymentMethod?.value || "Cash";
 
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
     const total = subtotal.toFixed(2);
 
     const orders = getOrders();
-
     const order = {
         id: Date.now(),
         userName: user.name,
@@ -199,19 +168,17 @@ function confirmOrder() {
     toast("Order placed! It will be ready at " + deliveryTime);
 }
 
-function cancelOrder(orderId) {
-    if (!confirm("Are you sure you want to cancel this order?")) return;
-
+function cancelOrder(orderId){
     const orders = getOrders();
-    const index = orders.findIndex(o => o.id === orderId);
-    if (index === -1) return;
+    const index = orders.findIndex(o=>o.id===orderId);
+    if(index===-1) return;
 
-    if (orders[index].status === "Completed" || orders[index].status === "Ready") {
-        alert("Cannot cancel. Order is already ready/completed.");
+    if(orders[index].status==="Completed" || orders[index].status==="Ready"){
+        toast("Order cannot be cancelled");
         return;
     }
 
-    orders[index].status = "Cancelled";
+    orders[index].status="Cancelled";
     saveOrders(orders);
 
     renderProfile();
@@ -220,4 +187,19 @@ function cancelOrder(orderId) {
     toast("Order cancelled");
 }
 
-// باقي دوال profile, admin, toast, logout, updateProfileLink, registerUser كما كانت موجودة
+function toast(msg){
+    const t = document.createElement("div");
+    t.className="toast";
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(()=>{ t.remove(); },2000);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+    updateCartCount();
+    updateProfileLink();
+    renderMenuGrid('all');
+    renderCartPage();
+    renderProfile();
+    if(location.pathname.endsWith('admin.html')) renderAdmin();
+});
