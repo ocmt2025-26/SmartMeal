@@ -8,12 +8,18 @@
 </head>
 <body>
 
-<header>
-    <div class="header-left">
-        <img src="images/college-logo.png" alt="College Logo" class="logo">
-        <span class="brand">SmartMeal</span>
+<header class="site-header">
+    <div class="brand">
+        <div class="logo-box">
+            <img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg" 
+                 alt="College Logo" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
+        </div>
+        <div>
+            <h1>SmartMeal</h1>
+            <p class="subtitle">Menu</p>
+        </div>
     </div>
-    <nav class="header-nav">
+    <nav class="nav">
         <a href="index.html">Home</a>
         <a href="menu.html">Menu</a>
         <a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
@@ -21,7 +27,7 @@
     </nav>
 </header>
 
-<main>
+<main class="container fade-in">
     <div class="filters">
         <button class="chip active" onclick="filterType('all', this)">All</button>
         <button class="chip" onclick="filterType('main', this)">Main</button>
@@ -32,6 +38,24 @@
     <div id="menuGrid" class="menu-grid"></div>
 </main>
 
+<footer class="site-footer">
+    <div>Contact: cafeteria@ocmt.edu.om</div>
+    <div>© SmartMeal • Terms & Conditions</div>
+</footer>
+
 <script src="app.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+    renderMenuGrid('all');
+});
+
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    const cart = JSON.parse(localStorage.getItem('smartmeal_cart')) || [];
+    cartCount.innerText = cart.reduce((acc, item) => acc + item.qty, 0);
+}
+</script>
+
 </body>
 </html>
