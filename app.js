@@ -163,7 +163,7 @@ function confirmOrder(){
 
     renderCartPage();
     renderProfile();
-    renderAdmin();
+    renderAdmin?.();
 
     toast("Order placed! It will be ready at " + deliveryTime);
 }
@@ -182,7 +182,7 @@ function cancelOrder(orderId){
     saveOrders(orders);
 
     renderProfile();
-    renderAdmin();
+    renderAdmin?.();
 
     toast("Order cancelled");
 }
