@@ -19,7 +19,7 @@ function saveCart(c) { localStorage.setItem('smartmeal_cart', JSON.stringify(c))
 function getOrders() { return JSON.parse(localStorage.getItem('smartmeal_orders') || '[]'); }
 function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify(o)); }
 function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
-function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
+function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); renderProfile(); }
 
 function renderMenuGrid(type = 'all') {
     const grid = document.getElementById('menuGrid');
@@ -187,6 +187,82 @@ function cancelOrder(orderId){
     toast("Order cancelled");
 }
 
+function renderProfile(){
+    const profileBox = document.getElementById('profileBox');
+    const orderHistory = document.getElementById('orderHistory');
+    const user = getUser();
+    if(!profileBox) return;
+
+    if(!user){
+        profileBox.innerHTML='<p>Please login to view profile</p>';
+        if(orderHistory) orderHistory.innerHTML='';
+        return;
+    }
+
+    profileBox.innerHTML=`
+        <p><strong>Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Phone:</strong> ${user.phone || '-'}</p>
+        <button class="btn ghost" onclick="logout()">Logout</button>
+    `;
+
+    if(orderHistory){
+        const orders = getOrders().filter(o=>o.userEmail===user.email);
+        if(orders.length===0){ orderHistory.innerHTML='<p>No orders yet</p>'; }
+        else{
+            orderHistory.innerHTML='';
+            orders.forEach(o=>{
+                const div = document.createElement('div');
+                div.className='order-item';
+                div.innerHTML=`
+                    <p><strong>Order #${o.id}</strong> - ${o.status}</p>
+                    <ul>
+                        ${o.items.map(i=>`<li>${i.name} x ${i.qty}</li>`).join('')}
+                    </ul>
+                    <p>Total: ${o.total} OMR</p>
+                    <button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>
+                `;
+                orderHistory.appendChild(div);
+            });
+        }
+    }
+}
+
+function logout(){
+    localStorage.removeItem('smartmeal_user');
+    updateProfileLink();
+    renderProfile();
+    toast('Logged out');
+}
+
+function updateProfileLink(){
+    const link = document.getElementById('profileLink');
+    const user = getUser();
+    if(!link) return;
+    if(user) link.innerText='Profile';
+    else link.innerText='Account';
+}
+
+function doLogin(){
+    const name = document.getElementById('name')?.value.trim();
+    const email = document.getElementById('email')?.value.trim();
+    const password = document.getElementById('password')?.value.trim();
+    const phone = document.getElementById('phone')?.value.trim();
+
+    if(!email || !password){ toast('Email and password required'); return; }
+
+    if(email===ADMIN_CREDENTIALS.email && password===ADMIN_CREDENTIALS.password){
+        saveUser({ name: 'Admin', email, phone });
+        toast('Admin logged in');
+        if(location.pathname.endsWith('login.html')) location.href='admin.html';
+        return;
+    }
+
+    saveUser({ name: name||'User', email, phone });
+    toast('Login successful');
+    if(location.pathname.endsWith('login.html')) location.href='profile.html';
+}
+
 function toast(msg){
     const t = document.createElement("div");
     t.className="toast";
@@ -195,57 +271,11 @@ function toast(msg){
     setTimeout(()=>{ t.remove(); },2000);
 }
 
-function doLogin() {
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-
-    if(!name || !email || !password){
-        alert("Please fill in all required fields");
-        return;
-    }
-
-    if(email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password){
-        const admin = { name: "Admin", email: email, role: "admin" };
-        saveUser(admin);
-        window.location.href = 'admin.html';
-        return;
-    }
-
-    const user = { name, email, phone, role: "user" };
-    saveUser(user);
-    window.location.href = 'profile.html';
-}
-
-function logout() {
-    localStorage.removeItem('smartmeal_user');
-    window.location.href = 'login.html';
-}
-
-function updateProfileLink() {
-    const user = getUser();
-    const link = document.getElementById('profileLink');
-    if(user && link){
-        link.textContent = user.name;
-    } else if(link){
-        link.textContent = 'Account';
-    }
-}
-
-function checkLogin() {
-    const user = getUser();
-    if(!user){
-        window.location.href = 'login.html';
-        return;
-    }
-}
-
 window.addEventListener('DOMContentLoaded',()=>{
     updateCartCount();
     updateProfileLink();
     renderMenuGrid('all');
     renderCartPage();
     renderProfile();
-    if(location.pathname.endsWith('admin.html')) renderAdmin();
+    if(location.pathname.endsWith('admin.html')) renderAdmin?.();
 });
