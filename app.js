@@ -61,6 +61,7 @@ function addToCart(id) {
     if(existing) existing.qty+=1;
     else cart.push({ id: it.id, name: it.name, price: it.price, qty: 1 });
     saveCart(cart);
+    renderCartPage();
     toast(it.name+" added to cart");
 }
 
@@ -68,7 +69,11 @@ function updateCartCount() {
     const cart = getCart();
     const count = cart.reduce((s,i)=>s+i.qty,0);
     const el = document.getElementById('cartCount');
-    if(el) el.innerText = count;
+    if(el){
+        const user = getUser();
+        el.innerText = count;
+        updateProfileLink(user);
+    }
 }
 
 function renderCartPage() {
@@ -133,7 +138,6 @@ function confirmOrder(){
 
     const deliveryTimeInput = document.getElementById("deliveryTime");
     const paymentMethod = document.getElementById("paymentMethod");
-
     const deliveryTime = deliveryTimeInput?.value || "Not selected";
     const payment = paymentMethod?.value || "Cash";
 
@@ -163,7 +167,7 @@ function confirmOrder(){
 
     renderCartPage();
     renderProfile();
-    renderAdmin?.();
+    renderAdmin();
 
     toast("Order placed! It will be ready at " + deliveryTime);
 }
@@ -182,7 +186,7 @@ function cancelOrder(orderId){
     saveOrders(orders);
 
     renderProfile();
-    renderAdmin?.();
+    renderAdmin();
 
     toast("Order cancelled");
 }
@@ -220,7 +224,7 @@ function renderProfile(){
                         ${o.items.map(i=>`<li>${i.name} x ${i.qty}</li>`).join('')}
                     </ul>
                     <p>Total: ${o.total} OMR</p>
-                    <button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>
+                    ${o.status!=="Cancelled" ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
                 `;
                 orderHistory.appendChild(div);
             });
@@ -239,7 +243,7 @@ function updateProfileLink(){
     const link = document.getElementById('profileLink');
     const user = getUser();
     if(!link) return;
-    if(user) link.innerText='Profile';
+    if(user) link.innerText=user.name;
     else link.innerText='Account';
 }
 
@@ -263,6 +267,45 @@ function doLogin(){
     if(location.pathname.endsWith('login.html')) location.href='profile.html';
 }
 
+function renderAdmin(){
+    const list = document.getElementById('ordersList');
+    if(!list) return;
+    const orders = getOrders();
+    list.innerHTML='';
+    if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
+    orders.forEach(o=>{
+        const div = document.createElement('div');
+        div.className='card';
+        div.style.marginBottom='8px';
+        div.innerHTML=`
+            <strong>Order #${o.id}</strong>
+            <div>User: ${o.userName}</div>
+            <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+            <div>Total: ${o.total} OMR</div>
+            <div>Status: 
+                <select onchange="updateOrderStatus(${o.id}, this.value)">
+                    <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
+                    <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
+                    <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+                    <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+                </select>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function updateOrderStatus(orderId, status){
+    const orders = getOrders();
+    const idx = orders.findIndex(o=>o.id===orderId);
+    if(idx===-1) return;
+    orders[idx].status = status;
+    saveOrders(orders);
+    renderAdmin();
+    renderProfile();
+    toast('Order status updated');
+}
+
 function toast(msg){
     const t = document.createElement("div");
     t.className="toast";
@@ -277,5 +320,5 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderMenuGrid('all');
     renderCartPage();
     renderProfile();
-    if(location.pathname.endsWith('admin.html')) renderAdmin?.();
+    if(location.pathname.endsWith('admin.html')) renderAdmin();
 });
