@@ -166,7 +166,7 @@ function confirmOrder(){
     renderProfile();
     renderAdmin?.();
 
-    toast('Order placed! Delivery at ' + deliveryTime);
+    toast('Order placed! Pick up at ' + deliveryTime);
 }
 
 function renderProfile(){
@@ -197,12 +197,12 @@ function renderProfile(){
             div.className='order-item';
             div.innerHTML=`
                 <p><strong>Order #${o.id}</strong> - ${o.status}</p>
-                <div><strong>Delivery Time:</strong> ${o.deliveryTime}</div>
+                <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
                 <ul>
                     ${o.items.map(i=>`<li>${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</li>`).join('')}
                 </ul>
                 <p>Total: ${o.total} OMR</p>
-                ${o.status!=='Cancelled' && o.status!=='Completed' && o.status!=='Ready' ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
+                ${o.status!=='Cancelled' && o.status!=='Completed' ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
             `;
             orderHistory.appendChild(div);
         });
@@ -221,10 +221,10 @@ function renderAdmin(){
         div.style.marginBottom='8px';
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
-            <div>User: ${o.userName}</div>
+            <div>Name: ${o.userName}</div>
             <div>Email: ${o.userEmail}</div>
             <div>Phone: ${o.userPhone || '-'}</div>
-            <div>Delivery Time: ${o.deliveryTime}</div>
+            <div>Pick up time: ${o.deliveryTime}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total} OMR</div>
             <div>Status:
@@ -234,11 +234,19 @@ function renderAdmin(){
                     <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
                     <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
                 </select>
-                ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" onclick="deleteOrder(${o.id})">Delete</button>` : ''}
             </div>
+            ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" style="margin-top:5px;" onclick="deleteOrder(${o.id})">Delete Order</button>` : ''}
         `;
         list.appendChild(div);
     });
+}
+
+function deleteOrder(orderId){
+    let orders = getOrders();
+    orders = orders.filter(o=>o.id!==orderId);
+    saveOrders(orders);
+    renderAdmin();
+    toast('Order deleted');
 }
 
 function updateOrderStatus(orderId, status){
@@ -265,15 +273,6 @@ function cancelOrder(orderId){
     renderProfile();
     renderAdmin?.();
     toast('Order cancelled');
-}
-
-function deleteOrder(orderId){
-    let orders = getOrders();
-    orders = orders.filter(o=>o.id!==orderId);
-    saveOrders(orders);
-    renderProfile();
-    renderAdmin?.();
-    toast('Order deleted');
 }
 
 function logout(){
