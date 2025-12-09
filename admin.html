@@ -71,6 +71,7 @@ if (!user || !user.isAdmin) {
                         <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
                     </select>
                 </div>
+                ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" onclick="deleteOrder(${o.id})">Delete Order</button>` : ''}
             `;
             list.appendChild(div);
         });
