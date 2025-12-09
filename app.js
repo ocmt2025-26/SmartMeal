@@ -14,22 +14,22 @@ const MENU = [
 
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
-function getCart() { return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
-function saveCart(c) { localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
-function getOrders() { return JSON.parse(localStorage.getItem('smartmeal_orders') || '[]'); }
-function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify(o)); }
-function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
-function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); renderProfile(); }
+function getCart(){ return JSON.parse(localStorage.getItem('smartmeal_cart')||'[]'); }
+function saveCart(c){ localStorage.setItem('smartmeal_cart',JSON.stringify(c)); updateCartCount(); }
+function getOrders(){ return JSON.parse(localStorage.getItem('smartmeal_orders')||'[]'); }
+function saveOrders(o){ localStorage.setItem('smartmeal_orders',JSON.stringify(o)); }
+function getUser(){ return JSON.parse(localStorage.getItem('smartmeal_user')||'null'); }
+function saveUser(u){ localStorage.setItem('smartmeal_user',JSON.stringify(u)); updateProfileLink(); renderProfile(); renderAdmin?.(); }
 
-function renderMenuGrid(type = 'all') {
+function renderMenuGrid(type='all'){
     const grid = document.getElementById('menuGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    const items = MENU.filter(i => type==='all'?true:i.type===type);
-    items.forEach(it => {
+    if(!grid) return;
+    grid.innerHTML='';
+    const items = MENU.filter(i=>type==='all'?true:i.type===type);
+    items.forEach(it=>{
         const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
+        card.className='card';
+        card.innerHTML=`
             <h3>${it.name}</h3>
             <div class="price">${it.price.toFixed(2)} OMR</div>
             <div style="display:flex;gap:8px;margin-top:8px">
@@ -41,20 +41,20 @@ function renderMenuGrid(type = 'all') {
     });
 }
 
-function filterType(type, el) {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+function filterType(type,el){
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
     if(el) el.classList.add('active');
     renderMenuGrid(type);
 }
 
-function viewItem(id) {
-    const it = MENU.find(m => m.id===id);
+function viewItem(id){
+    const it = MENU.find(m=>m.id===id);
     if(!it) return;
-    toast(it.name + " - " + it.price.toFixed(2) + " OMR");
+    toast(it.name+" - "+it.price.toFixed(2)+" OMR");
 }
 
-function addToCart(id) {
-    const it = MENU.find(m => m.id===id);
+function addToCart(id){
+    const it = MENU.find(m=>m.id===id);
     if(!it) return;
     const cart = getCart();
     const existing = cart.find(c=>c.id===id);
@@ -65,18 +65,14 @@ function addToCart(id) {
     toast(it.name+" added to cart");
 }
 
-function updateCartCount() {
+function updateCartCount(){
     const cart = getCart();
     const count = cart.reduce((s,i)=>s+i.qty,0);
     const el = document.getElementById('cartCount');
-    if(el){
-        const user = getUser();
-        el.innerText = count;
-        updateProfileLink(user);
-    }
+    if(el) el.innerText=count;
 }
 
-function renderCartPage() {
+function renderCartPage(){
     const container = document.getElementById('cartContainer');
     if(!container) return;
     const cart = getCart();
@@ -122,17 +118,15 @@ function removeItem(index){
 function calculateTotals(){
     const cart = getCart();
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const total = subtotal;
     const elSub = document.getElementById('subtotal');
     const elTot = document.getElementById('total');
     if(elSub) elSub.innerText=subtotal.toFixed(2);
-    if(elTot) elTot.innerText=total.toFixed(2);
+    if(elTot) elTot.innerText=subtotal.toFixed(2);
 }
 
 function confirmOrder(){
     const cart = getCart();
     if(cart.length===0){ toast('Your cart is empty'); return; }
-
     const user = getUser();
     if(!user){ toast('Please login first'); return; }
 
@@ -176,18 +170,13 @@ function cancelOrder(orderId){
     const orders = getOrders();
     const index = orders.findIndex(o=>o.id===orderId);
     if(index===-1) return;
-
     if(orders[index].status==="Completed" || orders[index].status==="Ready"){
-        toast("Order cannot be cancelled");
-        return;
+        toast("Order cannot be cancelled"); return;
     }
-
     orders[index].status="Cancelled";
     saveOrders(orders);
-
     renderProfile();
     renderAdmin();
-
     toast("Order cancelled");
 }
 
@@ -196,7 +185,6 @@ function renderProfile(){
     const orderHistory = document.getElementById('orderHistory');
     const user = getUser();
     if(!profileBox) return;
-
     if(!user){
         profileBox.innerHTML='<p>Please login to view profile</p>';
         if(orderHistory) orderHistory.innerHTML='';
@@ -206,7 +194,7 @@ function renderProfile(){
     profileBox.innerHTML=`
         <p><strong>Name:</strong> ${user.name}</p>
         <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Phone:</strong> ${user.phone || '-'}</p>
+        <p><strong>Phone:</strong> ${user.phone||'-'}</p>
         <button class="btn ghost" onclick="logout()">Logout</button>
     `;
 
@@ -224,7 +212,7 @@ function renderProfile(){
                         ${o.items.map(i=>`<li>${i.name} x ${i.qty}</li>`).join('')}
                     </ul>
                     <p>Total: ${o.total} OMR</p>
-                    ${o.status!=="Cancelled" ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
+                    <button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>
                 `;
                 orderHistory.appendChild(div);
             });
@@ -252,18 +240,15 @@ function doLogin(){
     const email = document.getElementById('email')?.value.trim();
     const password = document.getElementById('password')?.value.trim();
     const phone = document.getElementById('phone')?.value.trim();
-
-    if(!email || !password){ toast('Email and password required'); return; }
+    if(!email||!password){ toast('Email and password required'); return; }
 
     if(email===ADMIN_CREDENTIALS.email && password===ADMIN_CREDENTIALS.password){
-        saveUser({ name: 'Admin', email, phone });
-        toast('Admin logged in');
+        saveUser({name:'Admin',email,phone}); toast('Admin logged in');
         if(location.pathname.endsWith('login.html')) location.href='admin.html';
         return;
     }
 
-    saveUser({ name: name||'User', email, phone });
-    toast('Login successful');
+    saveUser({name:name||'User',email,phone}); toast('Login successful');
     if(location.pathname.endsWith('login.html')) location.href='profile.html';
 }
 
@@ -295,23 +280,23 @@ function renderAdmin(){
     });
 }
 
-function updateOrderStatus(orderId, status){
+function updateOrderStatus(orderId,status){
     const orders = getOrders();
-    const idx = orders.findIndex(o=>o.id===orderId);
-    if(idx===-1) return;
-    orders[idx].status = status;
+    const index = orders.findIndex(o=>o.id===orderId);
+    if(index===-1) return;
+    orders[index].status=status;
     saveOrders(orders);
-    renderAdmin();
     renderProfile();
-    toast('Order status updated');
+    renderAdmin();
+    toast("Order status updated");
 }
 
 function toast(msg){
-    const t = document.createElement("div");
+    const t=document.createElement("div");
     t.className="toast";
-    t.innerText = msg;
+    t.innerText=msg;
     document.body.appendChild(t);
-    setTimeout(()=>{ t.remove(); },2000);
+    setTimeout(()=>{t.remove();},2000);
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
