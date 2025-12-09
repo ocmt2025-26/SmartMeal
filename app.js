@@ -202,7 +202,7 @@ function renderProfile(){
                     ${o.items.map(i=>`<li>${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</li>`).join('')}
                 </ul>
                 <p>Total: ${o.total} OMR</p>
-                ${o.status!=='Cancelled' && o.status!=='Completed' ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
+                ${o.status!=='Cancelled'&&o.status!=='Completed'&&o.status!=='Ready'?`<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>`:''}
             `;
             orderHistory.appendChild(div);
         });
@@ -221,13 +221,13 @@ function renderAdmin(){
         div.style.marginBottom='8px';
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
-            <div>Name: ${o.userName}</div>
-            <div>Email: ${o.userEmail}</div>
-            <div>Phone: ${o.userPhone || '-'}</div>
-            <div>Pick up time: ${o.deliveryTime}</div>
-            <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
-            <div>Total: ${o.total} OMR</div>
-            <div>Status:
+            <div><strong>Name:</strong> ${o.userName}</div>
+            <div><strong>Email:</strong> ${o.userEmail}</div>
+            <div><strong>Phone:</strong> ${o.userPhone || '-'}</div>
+            <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
+            <div><strong>Items:</strong> ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+            <div><strong>Total:</strong> ${o.total} OMR</div>
+            <div><strong>Status:</strong>
                 <select onchange="updateOrderStatus(${o.id}, this.value)">
                     <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
                     <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
@@ -235,18 +235,10 @@ function renderAdmin(){
                     <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
                 </select>
             </div>
-            ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" style="margin-top:5px;" onclick="deleteOrder(${o.id})">Delete Order</button>` : ''}
+            ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" onclick="deleteOrder(${o.id})">Delete Order</button>` : ''}
         `;
         list.appendChild(div);
     });
-}
-
-function deleteOrder(orderId){
-    let orders = getOrders();
-    orders = orders.filter(o=>o.id!==orderId);
-    saveOrders(orders);
-    renderAdmin();
-    toast('Order deleted');
 }
 
 function updateOrderStatus(orderId, status){
@@ -258,6 +250,16 @@ function updateOrderStatus(orderId, status){
     renderAdmin();
     renderProfile();
     toast('Order status updated');
+}
+
+function deleteOrder(orderId){
+    const orders = getOrders();
+    const index = orders.findIndex(o => o.id === orderId);
+    if(index === -1) return;
+    orders.splice(index,1);
+    saveOrders(orders);
+    renderAdmin();
+    toast('Order deleted');
 }
 
 function cancelOrder(orderId){
@@ -280,7 +282,7 @@ function logout(){
     updateProfileLink();
     renderProfile();
     toast('Logged out');
-    if(location.pathname.endsWith('admin.html')) location.href='login.html';
+    if(location.pathname.endsWith('admin.html')) location.href='admin-login.html';
 }
 
 function updateProfileLink(){
