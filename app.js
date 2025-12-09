@@ -295,20 +295,14 @@ function doLogin(){
         return;
     }
 
-    saveUser({ name:name||'User', email, phone });
-    toast('Login successful');
-    if(location.pathname.endsWith('login.html')) location.href='profile.html';
+    saveUser({ name: name || 'User', email, phone });
+toast('Login successful');
+if(location.pathname.endsWith('login.html')) location.href='profile.html';
+
+function toast(msg){ 
+    alert(msg); 
 }
 
-function toast(msg){
-    const t = document.createElement('div');
-    t.className='toast';
-    t.innerText=msg;
-    const existing = document.querySelector('.toast');
-    if(existing) existing.remove();
-    document.body.appendChild(t);
-    setTimeout(()=>{ t.remove(); },2000);
-}
 
 window.addEventListener('DOMContentLoaded',()=>{
     updateCartCount();
