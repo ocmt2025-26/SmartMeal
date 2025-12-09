@@ -25,16 +25,20 @@ function renderMenuGrid(type='all') {
     const grid = document.getElementById('menuGrid');
     if(!grid) return;
     grid.innerHTML='';
-    const items = MENU.filter(i=> type==='all'?true:i.type===type);
-    items.forEach(it=>{
+
+    const items = MENU.filter(i => type==='all' ? true : i.type===type);
+
+    items.forEach(it => {
         const card = document.createElement('div');
-        card.className='menu-item';
-        card.innerHTML=`
-            <h3>${it.name}</h3>
-            <p class="price">${it.price.toFixed(2)} OMR</p>
-            <div class="actions">
-                <button class="btn primary" onclick="addToCart(${it.id})">Add to Cart</button>
-                <button class="btn ghost" onclick="viewItem(${it.id})">View</button>
+        card.className='card menu-item';
+        card.innerHTML = `
+            <div class="menu-item-content">
+                <h3>${it.name}</h3>
+                <p class="price">${it.price.toFixed(2)} OMR</p>
+                <div class="menu-item-actions">
+                    <button class="btn primary" onclick="addToCart(${it.id})">Add to Cart</button>
+                    <button class="btn ghost" onclick="viewItem(${it.id})">View</button>
+                </div>
             </div>
         `;
         grid.appendChild(card);
