@@ -220,7 +220,8 @@ function renderAdmin(){
         div.style.marginBottom='8px';
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
-            <div>User: ${o.userName} (${o.userEmail})</div>
+            <div>User: ${o.userName}</div>
+            <div>Email: ${o.userEmail}</div>
             <div>Phone: ${o.userPhone || '-'}</div>
             <div>Delivery Time: ${o.deliveryTime}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
@@ -315,3 +316,4 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderProfile();
     if(location.pathname.endsWith('admin.html')) renderAdmin();
 });
+
