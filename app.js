@@ -201,7 +201,7 @@ function renderProfile(){
                     ${o.items.map(i=>`<li>${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</li>`).join('')}
                 </ul>
                 <p>Total: ${o.total} OMR</p>
-                ${o.status!=='Cancelled'&&o.status!=='Completed'?`<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>`:''}
+                ${o.status!=='Cancelled' && o.status!=='Completed' && o.status!=='Ready' ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
             `;
             orderHistory.appendChild(div);
         });
