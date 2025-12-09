@@ -296,13 +296,13 @@ function doLogin(){
     }
 
     saveUser({ name: name || 'User', email, phone });
-toast('Login successful');
-if(location.pathname.endsWith('login.html')) location.href='profile.html';
+    toast('Login successful');
+    if(location.pathname.endsWith('login.html')) location.href='profile.html';
+}
 
 function toast(msg){ 
     alert(msg); 
 }
-
 
 window.addEventListener('DOMContentLoaded',()=>{
     updateCartCount();
