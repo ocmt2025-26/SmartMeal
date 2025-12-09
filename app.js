@@ -25,9 +25,7 @@ function renderMenuGrid(type='all') {
     const grid = document.getElementById('menuGrid');
     if(!grid) return;
     grid.innerHTML='';
-
     const items = MENU.filter(i => type==='all' ? true : i.type===type);
-
     items.forEach(it => {
         const card = document.createElement('div');
         card.className='card menu-item';
@@ -81,6 +79,7 @@ function renderCartPage(){
     if(!container) return;
     const cart = getCart();
     container.innerHTML='';
+
     if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; calculateTotals(); return; }
 
     cart.forEach((item, idx)=>{
@@ -101,6 +100,33 @@ function renderCartPage(){
         container.appendChild(div);
     });
     calculateTotals();
+}
+
+function changeQty(index, delta){
+    const cart = getCart();
+    if(!cart[index]) return;
+    cart[index].qty += delta;
+    if(cart[index].qty<1) cart.splice(index,1);
+    saveCart(cart);
+    renderCartPage();
+}
+
+function removeItem(index){
+    const cart = getCart();
+    if(!cart[index]) return;
+    cart.splice(index,1);
+    saveCart(cart);
+    renderCartPage();
+}
+
+function calculateTotals(){
+    const cart = getCart();
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const total = subtotal;
+    const elSub = document.getElementById('subtotal');
+    const elTot = document.getElementById('total');
+    if(elSub) elSub.innerText = subtotal.toFixed(2);
+    if(elTot) elTot.innerText = total.toFixed(2);
 }
 
 function confirmOrder(){
@@ -141,21 +167,6 @@ function confirmOrder(){
     renderAdmin?.();
 
     toast('Order placed! Delivery at ' + deliveryTime);
-}
-
-function cancelOrder(orderId){
-    const orders = getOrders();
-    const index = orders.findIndex(o=>o.id===orderId);
-    if(index===-1) return;
-    if(orders[index].status==='Completed' || orders[index].status==='Ready'){
-        toast('Order cannot be cancelled');
-        return;
-    }
-    orders[index].status='Cancelled';
-    saveOrders(orders);
-    renderProfile();
-    renderAdmin?.();
-    toast('Order cancelled');
 }
 
 function renderProfile(){
@@ -210,6 +221,8 @@ function renderAdmin(){
         div.innerHTML=`
             <strong>Order #${o.id}</strong>
             <div>User: ${o.userName} (${o.userEmail})</div>
+            <div>Phone: ${o.userPhone || '-'}</div>
+            <div>Delivery Time: ${o.deliveryTime}</div>
             <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
             <div>Total: ${o.total} OMR</div>
             <div>Status:
@@ -236,6 +249,21 @@ function updateOrderStatus(orderId, status){
     toast('Order status updated');
 }
 
+function cancelOrder(orderId){
+    const orders = getOrders();
+    const index = orders.findIndex(o=>o.id===orderId);
+    if(index===-1) return;
+    if(orders[index].status==='Completed' || orders[index].status==='Ready'){
+        toast('Order cannot be cancelled');
+        return;
+    }
+    orders[index].status='Cancelled';
+    saveOrders(orders);
+    renderProfile();
+    renderAdmin?.();
+    toast('Order cancelled');
+}
+
 function logout(){
     localStorage.removeItem('smartmeal_user');
     updateProfileLink();
@@ -260,7 +288,7 @@ function doLogin(){
     if(!email || !password){ toast('Email and password required'); return; }
 
     if(email===ADMIN_CREDENTIALS.email && password===ADMIN_CREDENTIALS.password){
-        saveUser({ name:'Admin', email, phone });
+        saveUser({ name:'Admin', email, phone, isAdmin:true });
         toast('Admin logged in');
         if(location.pathname.endsWith('login.html')) location.href='admin.html';
         return;
@@ -287,30 +315,3 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderProfile();
     if(location.pathname.endsWith('admin.html')) renderAdmin();
 });
-
-function changeQty(index, delta){
-    const cart = getCart();
-    if(!cart[index]) return;
-    cart[index].qty += delta;
-    if(cart[index].qty < 1) cart.splice(index,1);
-    saveCart(cart);
-    renderCartPage();
-}
-
-function removeItem(index){
-    const cart = getCart();
-    if(!cart[index]) return;
-    cart.splice(index,1);
-    saveCart(cart);
-    renderCartPage();
-}
-
-function calculateTotals(){
-    const cart = getCart();
-    let subtotal = cart.reduce((s,i)=>s + i.price * i.qty, 0);
-    const total = subtotal;
-    const elSub = document.getElementById('subtotal');
-    const elTot = document.getElementById('total');
-    if(elSub) elSub.innerText = subtotal.toFixed(2);
-    if(elTot) elTot.innerText = total.toFixed(2);
-}
