@@ -60,7 +60,7 @@ if (!user || !user.isAdmin) {
                 <div><strong>Name:</strong> ${o.userName}</div>
                 <div><strong>Email:</strong> ${o.userEmail}</div>
                 <div><strong>Phone:</strong> ${o.userPhone || '-'}</div>
-                <div><strong>Delivery Time:</strong> ${o.deliveryTime}</div>
+                <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
                 <div><strong>Items:</strong> ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
                 <div><strong>Total:</strong> ${o.total} OMR</div>
                 <div><strong>Status:</strong>
