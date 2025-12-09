@@ -197,15 +197,12 @@ function renderProfile(){
             div.className='order-item';
             div.innerHTML=`
                 <p><strong>Order #${o.id}</strong> - ${o.status}</p>
+                <div><strong>Delivery Time:</strong> ${o.deliveryTime}</div>
                 <ul>
                     ${o.items.map(i=>`<li>${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</li>`).join('')}
                 </ul>
                 <p>Total: ${o.total} OMR</p>
-                ${
-                    (o.status !== 'Cancelled' && o.status !== 'Completed' && o.status !== 'Ready') 
-                    ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` 
-                    : ''
-                }
+                ${o.status!=='Cancelled' && o.status!=='Completed' && o.status!=='Ready' ? `<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
             `;
             orderHistory.appendChild(div);
         });
@@ -237,6 +234,7 @@ function renderAdmin(){
                     <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
                     <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
                 </select>
+                ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" onclick="deleteOrder(${o.id})">Delete</button>` : ''}
             </div>
         `;
         list.appendChild(div);
@@ -267,6 +265,15 @@ function cancelOrder(orderId){
     renderProfile();
     renderAdmin?.();
     toast('Order cancelled');
+}
+
+function deleteOrder(orderId){
+    let orders = getOrders();
+    orders = orders.filter(o=>o.id!==orderId);
+    saveOrders(orders);
+    renderProfile();
+    renderAdmin?.();
+    toast('Order deleted');
 }
 
 function logout(){
