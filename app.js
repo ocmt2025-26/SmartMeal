@@ -195,6 +195,52 @@ function toast(msg){
     setTimeout(()=>{ t.remove(); },2000);
 }
 
+function doLogin() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+
+    if(!name || !email || !password){
+        alert("Please fill in all required fields");
+        return;
+    }
+
+    if(email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password){
+        const admin = { name: "Admin", email: email, role: "admin" };
+        saveUser(admin);
+        window.location.href = 'admin.html';
+        return;
+    }
+
+    const user = { name, email, phone, role: "user" };
+    saveUser(user);
+    window.location.href = 'profile.html';
+}
+
+function logout() {
+    localStorage.removeItem('smartmeal_user');
+    window.location.href = 'login.html';
+}
+
+function updateProfileLink() {
+    const user = getUser();
+    const link = document.getElementById('profileLink');
+    if(user && link){
+        link.textContent = user.name;
+    } else if(link){
+        link.textContent = 'Account';
+    }
+}
+
+function checkLogin() {
+    const user = getUser();
+    if(!user){
+        window.location.href = 'login.html';
+        return;
+    }
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
     updateCartCount();
     updateProfileLink();
