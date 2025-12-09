@@ -1,73 +1,151 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>SmartMeal - Cart</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartMeal - Cart</title>
+<link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <header class="site-header">
-        <div class="brand">
-            <div class="logo-box">
-                <img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg" 
-                     alt="College Logo" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
-            </div>
-            <div>
-                <h1>SmartMeal</h1>
-                <p class="subtitle">Cart</p>
-            </div>
+<header class="site-header">
+    <div class="brand">
+        <div class="logo-box">
+            <img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg" 
+                 alt="College Logo" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
         </div>
-        <nav class="nav">
-            <a href="index.html">Home</a>
-            <a href="menu.html">Menu</a>
-            <a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
-            <a href="profile.html" id="profileLink">Account</a>
-        </nav>
-    </header>
+        <div>
+            <h1>SmartMeal</h1>
+            <p class="subtitle">Cart</p>
+        </div>
+    </div>
+    <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+        <a href="profile.html" id="profileLink">Account</a>
+    </nav>
+</header>
 
-    <main class="container fade-in">
-        <h2>Your Cart</h2>
-        <div id="cartContainer"></div>
+<main class="container fade-in">
+    <h2>Your Cart</h2>
+    <div id="cartContainer"></div>
 
-        <div class="delivery-time" style="margin-top:20px;">
-            <h3>Choose Delivery Time</h3>
-            <input type="time" id="deliveryTime" class="time-input">
+    <div class="delivery-time" style="margin-top:20px;">
+        <h3>Choose Delivery Time</h3>
+        <input type="time" id="deliveryTime" class="time-input">
+    </div>
+
+    <div class="totals" style="margin-top:20px;">
+        <p>Subtotal: <span id="subtotal">0.00</span> OMR</p>
+        <p>Total: <span id="total">0.00</span> OMR</p>
+
+        <div class="payment">
+            <label for="paymentMethod">Payment:</label>
+            <select id="paymentMethod">
+                <option value="cod">Cash</option>
+            </select>
         </div>
 
-        <div class="totals" style="margin-top:20px;">
-            <p>Subtotal: <span id="subtotal">0.00</span> OMR</p>
-            <p>Total: <span id="total">0.00</span> OMR</p>
-
-            <div class="payment">
-                <label for="paymentMethod">Payment:</label>
-                <select id="paymentMethod">
-                    <option value="cod">Cash</option>
-                </select>
-            </div>
-
-            <div class="actions" style="margin-top:15px;">
-                <button class="btn primary" onclick="confirmOrder()">Confirm Order ✅</button>
-                <button class="btn ghost" onclick="clearCart()">Clear Cart</button>
-            </div>
+        <div class="actions" style="margin-top:15px;">
+            <button class="btn primary" onclick="confirmOrder()">Confirm Order ✅</button>
+            <button class="btn ghost" onclick="clearCart()">Clear Cart</button>
         </div>
-    </main>
+    </div>
+</main>
 
-    <footer class="site-footer">
-        <div>Contact: cafeteria@ocmt.edu.om</div>
-        <div>© SmartMeal • Terms & Conditions</div>
-    </footer>
+<footer class="site-footer">
+    <div>Contact: cafeteria@ocmt.edu.om</div>
+    <div>© SmartMeal • Terms & Conditions</div>
+</footer>
 
-    <script src="app.js"></script>
+<script src="app.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    const user = JSON.parse(localStorage.getItem('smartmeal_user'));
+    if(!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+    updateCartCount();
+    renderCartPage();
+});
 
-    <script>
-        window.onload = function () {
-            renderCartPage();
-            updateCartCount();
-        }
-    </script>
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    const cart = JSON.parse(localStorage.getItem('smartmeal_cart')) || [];
+    cartCount.innerText = cart.reduce((acc, item) => acc + item.quantity, 0);
+}
+
+function renderCartPage() {
+    const cartContainer = document.getElementById('cartContainer');
+    const cart = JSON.parse(localStorage.getItem('smartmeal_cart')) || [];
+    const subtotalElem = document.getElementById('subtotal');
+    const totalElem = document.getElementById('total');
+
+    cartContainer.innerHTML = '';
+    let subtotal = 0;
+
+    if(cart.length === 0) {
+        cartContainer.innerHTML = '<p>Your cart is empty.</p>';
+    } else {
+        cart.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.classList.add('cart-item');
+            div.innerHTML = `
+                <p><strong>${item.name}</strong> x ${item.quantity} - ${item.price.toFixed(2)} OMR</p>
+                <button class="btn ghost" onclick="removeFromCart(${index})">Remove</button>
+            `;
+            cartContainer.appendChild(div);
+            subtotal += item.price * item.quantity;
+        });
+    }
+
+    subtotalElem.innerText = subtotal.toFixed(2);
+    totalElem.innerText = subtotal.toFixed(2);
+}
+
+function removeFromCart(index) {
+    let cart = JSON.parse(localStorage.getItem('smartmeal_cart')) || [];
+    cart.splice(index, 1);
+    localStorage.setItem('smartmeal_cart', JSON.stringify(cart));
+    renderCartPage();
+    updateCartCount();
+}
+
+function clearCart() {
+    localStorage.removeItem('smartmeal_cart');
+    renderCartPage();
+    updateCartCount();
+}
+
+function confirmOrder() {
+    const cart = JSON.parse(localStorage.getItem('smartmeal_cart')) || [];
+    if(cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+    }
+    const deliveryTime = document.getElementById('deliveryTime').value;
+    if(!deliveryTime) {
+        alert('Please select a delivery time.');
+        return;
+    }
+    let orders = JSON.parse(localStorage.getItem('smartmeal_orders')) || [];
+    const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const newOrder = {
+        id: Date.now(),
+        user: JSON.parse(localStorage.getItem('smartmeal_user')).email,
+        items: cart,
+        total: total,
+        deliveryTime: deliveryTime,
+        status: 'Preparing'
+    };
+    orders.push(newOrder);
+    localStorage.setItem('smartmeal_orders', JSON.stringify(orders));
+    localStorage.removeItem('smartmeal_cart');
+    alert('Order confirmed!');
+    renderCartPage();
+    updateCartCount();
+}
+</script>
 </body>
-
 </html>
