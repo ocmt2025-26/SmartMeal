@@ -103,32 +103,6 @@ function renderCartPage(){
     calculateTotals();
 }
 
-function changeQty(index, delta){
-    const cart = getCart();
-    if(!cart[index]) return;
-    cart[index].qty += delta;
-    if(cart[index].qty<1) cart.splice(index,1);
-    saveCart(cart);
-    renderCartPage();
-}
-
-function removeItem(index){
-    const cart = getCart();
-    if(!cart[index]) return;
-    cart.splice(index,1);
-    saveCart(cart);
-    renderCartPage();
-}
-
-function calculateTotals(){
-    const cart = getCart();
-    let subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const elSub = document.getElementById('subtotal');
-    const elTot = document.getElementById('total');
-    if(elSub) elSub.innerText = subtotal.toFixed(2);
-    if(elTot) elTot.innerText = subtotal.toFixed(2);
-}
-
 function confirmOrder(){
     const cart = getCart();
     if(cart.length===0){ toast('Your cart is empty'); return; }
@@ -313,3 +287,30 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderProfile();
     if(location.pathname.endsWith('admin.html')) renderAdmin();
 });
+
+function changeQty(index, delta){
+    const cart = getCart();
+    if(!cart[index]) return;
+    cart[index].qty += delta;
+    if(cart[index].qty < 1) cart.splice(index,1);
+    saveCart(cart);
+    renderCartPage();
+}
+
+function removeItem(index){
+    const cart = getCart();
+    if(!cart[index]) return;
+    cart.splice(index,1);
+    saveCart(cart);
+    renderCartPage();
+}
+
+function calculateTotals(){
+    const cart = getCart();
+    let subtotal = cart.reduce((s,i)=>s + i.price * i.qty, 0);
+    const total = subtotal;
+    const elSub = document.getElementById('subtotal');
+    const elTot = document.getElementById('total');
+    if(elSub) elSub.innerText = subtotal.toFixed(2);
+    if(elTot) elTot.innerText = total.toFixed(2);
+}
