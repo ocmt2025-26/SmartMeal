@@ -49,6 +49,10 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'login.html';
         return;
     }
+
+    document.getElementById('headerUsername').innerText = user.name;
+    document.getElementById('profileLink').innerText = user.name;
+
     renderProfile();
 });
 </script>
