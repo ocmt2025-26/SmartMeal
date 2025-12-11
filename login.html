@@ -29,7 +29,7 @@
 
 <main class="container fade-in">
 <h2>Login / Register</h2>
-<form id="loginForm" onsubmit="event.preventDefault(); doLogin();">
+<form id="loginForm" onsubmit="event.preventDefault(); doLoginFirebase();">
 <label>Name</label>
 <input type="text" id="name" placeholder="Your Name" required>
 <label>Email</label>
@@ -39,6 +39,7 @@
 <label>Phone</label>
 <input type="text" id="phone" placeholder="Phone Number">
 <button class="btn primary" type="submit">Login</button>
+<p id="loginError" style="color:red;"></p>
 </form>
 </main>
 
@@ -47,9 +48,38 @@
 <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
-<script>
-updateProfileLink();
+<script type="module">
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
+const db = getDatabase();
+const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
+
+window.doLoginFirebase = function() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const errorEl = document.getElementById('loginError');
+    errorEl.innerText = '';
+
+    if(!email || !password){ errorEl.innerText = 'Email and password required'; return; }
+
+    if(email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password){
+        const adminData = { name:'Admin', email, phone, isAdmin:true };
+        localStorage.setItem('smartmeal_user', JSON.stringify(adminData));
+        location.href = 'admin.html';
+        return;
+    }
+
+    const usersRef = ref(db, 'users/' + btoa(email));
+    set(usersRef, { name, email, phone, password }).then(()=>{
+        const userData = { name, email, phone };
+        localStorage.setItem('smartmeal_user', JSON.stringify(userData));
+        location.href = 'profile.html';
+    }).catch(err=>{
+        errorEl.innerText = 'Error logging in. Try again.';
+    });
+};
 </script>
 </body>
 </html>
