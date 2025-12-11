@@ -43,18 +43,12 @@
     <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
+<script type="module" src="app.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     renderMenuGrid('all');
 });
-
-function updateCartCount() {
-    const cartCount = document.getElementById('cartCount');
-    const cart = JSON.parse(localStorage.getItem('smartmeal_cart')) || [];
-    cartCount.innerText = cart.reduce((acc, item) => acc + item.qty, 0);
-}
 </script>
 
 </body>
