@@ -1,16 +1,16 @@
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 const MENU = [
-  { id: 1,  name: 'Chicken Burger🍔',      price: 1.50, type: 'main' },
-  { id: 2,  name: 'Shawarma Sandwich🌯',   price: 1.10, type: 'main' },
-  { id: 3,  name: 'Black Coffee☕',        price: 1.00, type: 'drinks' },
-  { id: 4,  name: 'French Fries 🍟',       price: 0.70, type: 'main' },
-  { id: 5,  name: 'Choco Cake Slice🍰',    price: 1.20, type: 'dessert' },
-  { id: 6,  name: 'Cookies🍪',             price: 1.00, type: 'dessert' },
-  { id: 7,  name: 'Karak Tea ☕',          price: 0.10, type: 'drinks' },
-  { id: 8,  name: 'Pizza🍕',               price: 2.80, type: 'main' },
-  { id: 9,  name: 'Orange Fresh Juice🧃',  price: 1.10, type: 'drinks' },
-  { id: 10, name: 'Mango Fresh Juice 🧃',  price: 1.10, type: 'drinks' },
-  { id: 11, name: 'Ice Cream 🍦',          price: 0.30, type: 'dessert' }
+  { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
+  { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
+  { id: 3, name: 'Black Coffee☕', price: 1.00, type: 'drinks' },
+  { id: 4, name: 'French Fries 🍟', price: 0.70, type: 'main' },
+  { id: 5, name: 'Choco Cake Slice🍰', price: 1.20, type: 'dessert' },
+  { id: 6, name: 'Cookies🍪', price: 1.00, type: 'dessert' },
+  { id: 7, name: 'Karak Tea ☕', price: 0.10, type: 'drinks' },
+  { id: 8, name: 'Pizza🍕', price: 2.80, type: 'main' },
+  { id: 9, name: 'Orange Fresh Juice🧃', price: 1.10, type: 'drinks' },
+  { id: 10, name: 'Mango Fresh Juice 🧃', price: 1.10, type: 'drinks' },
+  { id: 11, name: 'Ice Cream 🍦', price: 0.30, type: 'dessert' }
 ];
 
 function getUser(){ return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
@@ -81,6 +81,12 @@ function renderMenuGrid(type='all'){
   });
 }
 
+function filterType(type, el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderMenuGrid(type);
+}
+
 function addToCart(id){
   const it = MENU.find(m=>m.id===id); if(!it) return;
   const cart = getCart();
@@ -146,9 +152,27 @@ function calculateTotals(){
   if(elTot) elTot.innerText = subtotal.toFixed(2);
 }
 
+function confirmOrder(){
+  const cart = getCart();
+  if(cart.length===0){ alert('Your cart is empty'); return; }
+  const user = getUser();
+  if(!user){ alert('Please login first'); return; }
+  alert('Your order has been sent to the cafeteria and will be ready in 10 minutes.');
+  localStorage.removeItem('smartmeal_cart');
+  updateCartCount();
+  renderCartPage();
+}
+
 window.addEventListener('DOMContentLoaded', ()=>{
   updateCartCount();
   updateProfileLink();
   renderMenuGrid('all');
+
+  document.querySelectorAll('.chip').forEach(el=>{
+    el.addEventListener('click', ()=>filterType(el.dataset.type, el));
+  });
+
   renderCartPage();
+  const confirmBtn = document.getElementById('confirmOrderBtn');
+  if(confirmBtn) confirmBtn.addEventListener('click', confirmOrder);
 });
