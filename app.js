@@ -1,3 +1,6 @@
+import { db } from './firebase-init.js';
+import { ref, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
 const MENU = [
     { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
     { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
@@ -13,9 +16,6 @@ const MENU = [
 ];
 
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
-
-import { db } from './firebase-init.js';
-import { ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 function getCart() { return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c) { localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
@@ -329,3 +329,14 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderProfile();
     if(location.pathname.endsWith('admin.html')) renderAdmin();
 });
+
+window.doLogin = doLogin;
+window.logout = logout;
+window.addToCart = addToCart;
+window.viewItem = viewItem;
+window.changeQty = changeQty;
+window.removeItem = removeItem;
+window.cancelOrder = cancelOrder;
+window.updateOrderStatus = updateOrderStatus;
+window.deleteOrder = deleteOrder;
+window.filterType = filterType;
