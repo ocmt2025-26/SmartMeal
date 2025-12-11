@@ -1,5 +1,9 @@
+// firebase-init.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import {
+  getDatabase, ref, push, onValue, update, remove,
+  query, orderByChild, equalTo
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyACuoVWxvF2jvHpfyjdtVXL1h1VZFr0YsQ",
@@ -12,5 +16,10 @@ const firebaseConfig = {
   measurementId: "G-W2MNS8BQGQ"
 };
 
-export const app = initializeApp(firebaseConfig);
-export const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.SMARTMEAL_DB = db;
+window.firebaseDb = {
+  db, ref, push, onValue, update, remove, query, orderByChild, equalTo
+};
