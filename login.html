@@ -49,9 +49,15 @@
 </footer>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-const db = getDatabase();
+const firebaseConfig = {
+  // ضع إعدادات Firebase هنا
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
 window.doLoginFirebase = async function() {
