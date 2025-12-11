@@ -45,38 +45,8 @@ if (!user || !user.isAdmin) {
     alert('Access denied. Admins only!');
     location.href = 'admin-login.html';
 } else {
-    renderAdmin = function(){
-        const list = document.getElementById('ordersList');
-        if(!list) return;
-        const orders = getOrders();
-        list.innerHTML='';
-        if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
-        orders.forEach(o=>{
-            const div = document.createElement('div');
-            div.className='card';
-            div.style.marginBottom='8px';
-            div.innerHTML=`
-                <strong>Order #${o.id}</strong>
-                <div><strong>Name:</strong> ${o.userName}</div>
-                <div><strong>Email:</strong> ${o.userEmail}</div>
-                <div><strong>Phone:</strong> ${o.userPhone || '-'}</div>
-                <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
-                <div><strong>Items:</strong> ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
-                <div><strong>Total:</strong> ${o.total} OMR</div>
-                <div><strong>Status:</strong>
-                    <select onchange="updateOrderStatus(${o.id}, this.value)">
-                        <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
-                        <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
-                        <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-                        <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
-                    </select>
-                </div>
-                ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" onclick="deleteOrder(${o.id})">Delete Order</button>` : ''}
-            `;
-            list.appendChild(div);
-        });
-    };
-    renderAdmin();
+    const deviceId = localStorage.getItem('smartmeal_device_id');
+    if(deviceId) renderAdminFirebase(deviceId);
 }
 </script>
 </body>
