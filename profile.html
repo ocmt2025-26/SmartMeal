@@ -41,6 +41,7 @@
     <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
+<script type="module" src="firebase-init.js"></script>
 <script src="app.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
@@ -53,44 +54,13 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('headerUsername').innerText = user.name;
     document.getElementById('profileLink').innerText = user.name;
 
-    const profileBox = document.getElementById('profileBox');
-    profileBox.innerHTML = `
-        <p><strong>Name:</strong> ${user.name}</p>
-        <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Phone:</strong> ${user.phone || 'N/A'}</p>
-    `;
-
-    const orderHistory = document.getElementById('orderHistory');
-    const orders = JSON.parse(localStorage.getItem('smartmeal_orders')) || [];
-    const userOrders = orders.filter(order => order.userEmail === user.email);
-
-    if (userOrders.length === 0) {
-        orderHistory.innerHTML = '<p>No orders yet.</p>';
-    } else {
-        userOrders.forEach(order => {
-            const div = document.createElement('div');
-            div.classList.add('order-item');
-            div.innerHTML = `
-                <h3>Order #${order.id} - ${order.status}</h3>
-                <p>${order.items.map(i => `${i.name} x${i.quantity}`).join('<br>')}</p>
-                <p><strong>Total:</strong> ${order.total.toFixed(2)} OMR</p>
-                ${order.status !== 'Cancelled' ? `<button class="btn ghost" onclick="cancelOrder('${order.id}')">Cancel</button>` : ''}
-            `;
-            orderHistory.appendChild(div);
-        });
-    }
+    renderProfile();
+    renderCartPage();
 });
 
 function logout() {
     localStorage.removeItem('smartmeal_user');
     window.location.href = 'login.html';
-}
-
-function cancelOrder(orderId) {
-    let orders = JSON.parse(localStorage.getItem('smartmeal_orders')) || [];
-    orders = orders.map(o => o.id === orderId ? {...o, status: 'Cancelled'} : o);
-    localStorage.setItem('smartmeal_orders', JSON.stringify(orders));
-    window.location.reload();
 }
 </script>
 </body>
