@@ -31,17 +31,13 @@
 <main class="container fade-in">
 
   <h2>Your Cart</h2>
-
-  <!-- Cart Items Container -->
   <div id="cartContainer"></div>
 
-  <!-- Delivery Time -->
   <div style="margin-top:25px;">
     <h3>Pick up time</h3>
     <input type="time" id="deliveryTime" class="time-input">
   </div>
 
-  <!-- Totals -->
   <div class="totals" style="margin-top:25px;">
     <p>Subtotal: <span id="subtotal">0.00</span> OMR</p>
     <p>Total: <span id="total">0.00</span> OMR</p>
@@ -68,11 +64,10 @@
   <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
-
+<script type="module" src="app.js"></script>
 <script>
   window.addEventListener("DOMContentLoaded", () => {
-    const user = JSON.parse(localStorage.getItem("smartmeal_user"));
+    const user = getUser();
     if (!user) {
       location.href = "login.html";
       return;
