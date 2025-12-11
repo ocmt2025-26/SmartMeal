@@ -49,12 +49,12 @@
 </footer>
 
 <script type="module">
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
 const db = getDatabase();
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
-window.doLoginFirebase = function() {
+window.doLoginFirebase = async function() {
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
@@ -71,14 +71,26 @@ window.doLoginFirebase = function() {
         return;
     }
 
-    const usersRef = ref(db, 'users/' + btoa(email));
-    set(usersRef, { name, email, phone, password }).then(()=>{
-        const userData = { name, email, phone };
-        localStorage.setItem('smartmeal_user', JSON.stringify(userData));
-        location.href = 'profile.html';
-    }).catch(err=>{
-        errorEl.innerText = 'Error logging in. Try again.';
-    });
+    const userRef = ref(db, 'users/' + btoa(email));
+    try {
+        const snapshot = await get(userRef);
+        if(snapshot.exists()){
+            const user = snapshot.val();
+            if(user.password === password){
+                localStorage.setItem('smartmeal_user', JSON.stringify({ name:user.name, email:user.email, phone:user.phone }));
+                location.href = 'profile.html';
+            } else {
+                errorEl.innerText = 'Incorrect password';
+            }
+        } else {
+            await set(userRef, { name, email, phone, password });
+            localStorage.setItem('smartmeal_user', JSON.stringify({ name, email, phone }));
+            location.href = 'profile.html';
+        }
+    } catch(err){
+        console.error(err);
+        errorEl.innerText = 'Error connecting to database';
+    }
 };
 </script>
 </body>
