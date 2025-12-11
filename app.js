@@ -1,4 +1,3 @@
-
 const MENU = [
   { id: 1,  name: 'Chicken Burger🍔',      price: 1.50, type: 'main' },
   { id: 2,  name: 'Shawarma Sandwich🌯',   price: 1.10, type: 'main' },
@@ -166,9 +165,24 @@ function doLogin(){
       location.href = 'admin.html';
     return;
   }
-  saveUser({ name: name || 'User', email, phone });
-  toast('Login successful');
-  if(location.pathname.endsWith('login.html')) location.href = 'profile.html';
+  let users = JSON.parse(localStorage.getItem('smartmeal_users') || '[]');
+  let existingUser = users.find(u => u.email === email);
+  if(existingUser){
+    if(existingUser.password === password){
+      saveUser(existingUser);
+      toast('Login successful');
+      location.href = 'profile.html';
+    } else {
+      toast('Incorrect password');
+    }
+  } else {
+    const newUser = { name: name || 'User', email, password, phone, isAdmin:false };
+    users.push(newUser);
+    localStorage.setItem('smartmeal_users', JSON.stringify(users));
+    saveUser(newUser);
+    toast('Registration successful, logged in!');
+    location.href = 'profile.html';
+  }
 }
 
 async function confirmOrder(){
@@ -242,14 +256,10 @@ function renderProfile(){
           <div><strong>Order #${o.id}</strong> - ${o.status}</div>
           <div>Pick up time: ${o.deliveryTime}</div>
           <div>
-            ${o.items.map(i => `
-              <div>- ${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</div>
-            `).join('')}
+            ${o.items.map(i => `<div>- ${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</div>`).join('')}
           </div>
           <div><strong>Total:</strong> ${o.total} OMR</div>
-          ${o.status!=='Cancelled' && o.status!=='Completed' && o.status!=='Ready'
-            ? `<button onclick="cancelOrder('${o.id}')">Cancel</button>`
-            : ''}
+          ${o.status!=='Cancelled' && o.status!=='Completed' && o.status!=='Ready' ? `<button onclick="cancelOrder('${o.id}')">Cancel</button>` : ''}
         `;
         orderHistory.appendChild(div);
       });
@@ -287,34 +297,30 @@ function renderAdminList(orders){
     list.innerHTML = '<p>No orders yet.</p>';
     return;
   }
-  orders
-    .sort((a,b)=> (a.created > b.created ? -1 : 1))
-    .forEach(o=>{
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.style.marginBottom = '8px';
-      div.innerHTML = `
-        <div class="row space-between">
-          <strong>Order #${o.id}</strong>
-          <span>Status: ${o.status}</span>
-        </div>
-        <div>Name: ${o.userName}</div>
-        <div>Email: ${o.userEmail}</div>
-        <div>Phone: ${o.userPhone || '-'}</div>
-        <div>Pick up time: ${o.deliveryTime}</div>
-        <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
-        <div><strong>Total: ${o.total} OMR</strong></div>
-        <div class="row gap-8" style="margin-top:8px">
-          <button onclick="updateOrderStatus('${o.id}', 'Ready')">Ready</button>
-          <button onclick="updateOrderStatus('${o.id}', 'Completed')">Completed</button>
-          <button class="secondary" onclick="updateOrderStatus('${o.id}', 'Cancelled')">Cancelled</button>
-          ${['Ready','Completed','Cancelled'].includes(o.status)
-            ? `<button class="danger" onclick="deleteOrder('${o.id}')">Delete Order</button>`
-            : ''}
-        </div>
-      `;
-      list.appendChild(div);
-    });
+  orders.sort((a,b)=> (a.created > b.created ? -1 : 1)).forEach(o=>{
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.marginBottom = '8px';
+    div.innerHTML = `
+      <div class="row space-between">
+        <strong>Order #${o.id}</strong>
+        <span>Status: ${o.status}</span>
+      </div>
+      <div>Name: ${o.userName}</div>
+      <div>Email: ${o.userEmail}</div>
+      <div>Phone: ${o.userPhone || '-'}</div>
+      <div>Pick up time: ${o.deliveryTime}</div>
+      <div>Items: ${o.items.map(i => i.name + ' x' + i.qty).join(', ')}</div>
+      <div><strong>Total: ${o.total} OMR</strong></div>
+      <div class="row gap-8" style="margin-top:8px">
+        <button onclick="updateOrderStatus('${o.id}', 'Ready')">Ready</button>
+        <button onclick="updateOrderStatus('${o.id}', 'Completed')">Completed</button>
+        <button class="secondary" onclick="updateOrderStatus('${o.id}', 'Cancelled')">Cancelled</button>
+        ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="danger" onclick="deleteOrder('${o.id}')">Delete Order</button>` : ''}
+      </div>
+    `;
+    list.appendChild(div);
+  });
 }
 
 async function updateOrderStatus(orderId, status){
@@ -350,3 +356,4 @@ window.addEventListener('DOMContentLoaded', ()=>{
   if(location.pathname.endsWith('admin.html')){
     listenAdminOrders(TENANT_ID);
   }
+});
