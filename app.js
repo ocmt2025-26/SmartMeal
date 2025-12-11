@@ -1,3 +1,22 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+import { getDatabase, ref, set, push, get, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyACuoVWxvF2jvHpfyjdtVXL1h1VZFr0YsQ",
+  authDomain: "smartmeal-7f276.firebaseapp.com",
+  databaseURL: "https://smartmeal-7f276-default-rtdb.firebaseio.com",
+  projectId: "smartmeal-7f276",
+  storageBucket: "smartmeal-7f276.firebasestorage.app",
+  messagingSenderId: "291729989038",
+  appId: "1:291729989038:web:cc99a3818578b488c3bc3f",
+  measurementId: "G-W2MNS8BQGQ"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase();
+
 const MENU = [
     { id: 1, name: 'Chicken Burger🍔', price: 1.50, type: 'main' },
     { id: 2, name: 'Shawarma Sandwich🌯', price: 1.10, type: 'main' },
@@ -16,10 +35,8 @@ const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
 function getCart() { return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c) { localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
-function getOrders() { return JSON.parse(localStorage.getItem('smartmeal_orders') || '[]'); }
-function saveOrders(o) { localStorage.setItem('smartmeal_orders', JSON.stringify(o)); }
 function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
-function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); renderProfile(); renderAdmin?.(); }
+function saveUser(u) { localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); renderProfile(); renderAdminFirebase(localStorage.getItem('smartmeal_device_id')); }
 
 function renderMenuGrid(type='all') {
     const grid = document.getElementById('menuGrid');
@@ -79,9 +96,7 @@ function renderCartPage(){
     if(!container) return;
     const cart = getCart();
     container.innerHTML='';
-
     if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; calculateTotals(); return; }
-
     cart.forEach((item, idx)=>{
         const div = document.createElement('div');
         div.className='cart-item';
@@ -137,11 +152,9 @@ function confirmOrder(){
 
     const deliveryTime = document.getElementById('deliveryTime')?.value || 'Not selected';
     const payment = document.getElementById('paymentMethod')?.value || 'Cash';
-
     const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
     const total = subtotal.toFixed(2);
 
-    const orders = getOrders();
     const order = {
         id: Date.now(),
         userName: user.name,
@@ -156,15 +169,17 @@ function confirmOrder(){
         status: 'Preparing'
     };
 
-    orders.unshift(order);
-    saveOrders(orders);
+    const deviceId = localStorage.getItem('smartmeal_device_id') || Date.now().toString();
+    localStorage.setItem('smartmeal_device_id', deviceId);
+
+    const ordersRef = ref(db, 'orders/' + deviceId);
+    push(ordersRef, order);
 
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
-
     renderCartPage();
     renderProfile();
-    renderAdmin?.();
+    renderAdminFirebase(deviceId);
 
     toast('Order placed! Pick up at ' + deliveryTime);
 }
@@ -189,99 +204,79 @@ function renderProfile(){
     `;
 
     if(orderHistory){
-        const orders = getOrders().filter(o=>o.userEmail===user.email);
-        if(orders.length===0){ orderHistory.innerHTML='<p>No orders yet</p>'; return; }
-        orderHistory.innerHTML='';
-        orders.forEach(o=>{
-            const div = document.createElement('div');
-            div.className='order-item';
-            div.innerHTML=`
-                <p><strong>Order #${o.id}</strong> - ${o.status}</p>
-                <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
-                <ul>
-                    ${o.items.map(i=>`<li>${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</li>`).join('')}
-                </ul>
-                <p>Total: ${o.total} OMR</p>
-                ${o.status!=='Cancelled'&&o.status!=='Completed'&&o.status!=='Ready'?`<button class="btn ghost" onclick="cancelOrder(${o.id})">Cancel</button>`:''}
-            `;
-            orderHistory.appendChild(div);
+        const deviceId = localStorage.getItem('smartmeal_device_id');
+        const ordersRef = ref(db, 'orders/' + deviceId);
+        onValue(ordersRef, snapshot=>{
+            const ordersData = snapshot.val() || {};
+            orderHistory.innerHTML='';
+            Object.values(ordersData).forEach(o=>{
+                const div = document.createElement('div');
+                div.className='order-item';
+                div.innerHTML=`
+                    <p><strong>Order #${o.id}</strong> - ${o.status}</p>
+                    <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
+                    <ul>
+                        ${o.items.map(i=>`<li>${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</li>`).join('')}
+                    </ul>
+                    <p>Total: ${o.total} OMR</p>
+                `;
+                orderHistory.appendChild(div);
+            });
         });
     }
 }
 
-function renderAdmin(){
+function renderAdminFirebase(deviceId){
     const list = document.getElementById('ordersList');
     if(!list) return;
-    const orders = getOrders();
-    list.innerHTML='';
-    if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
-    orders.forEach(o=>{
-        const div = document.createElement('div');
-        div.className='card';
-        div.style.marginBottom='8px';
-        div.innerHTML=`
-            <strong>Order #${o.id}</strong>
-            <div><strong>Name:</strong> ${o.userName}</div>
-            <div><strong>Email:</strong> ${o.userEmail}</div>
-            <div><strong>Phone:</strong> ${o.userPhone || '-'}</div>
-            <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
-            <div><strong>Items:</strong> ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
-            <div><strong>Total:</strong> ${o.total} OMR</div>
-            <div><strong>Status:</strong>
-                <select onchange="updateOrderStatus(${o.id}, this.value)">
-                    <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
-                    <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
-                    <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
-                    <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
-                </select>
-            </div>
-            ${['Ready','Completed','Cancelled'].includes(o.status) ? `<button class="btn ghost" onclick="deleteOrder(${o.id})">Delete Order</button>` : ''}
-        `;
-        list.appendChild(div);
+    const ordersRef = ref(db, 'orders/' + deviceId);
+    onValue(ordersRef, snapshot=>{
+        const ordersData = snapshot.val() || {};
+        list.innerHTML='';
+        Object.values(ordersData).forEach(o=>{
+            const div = document.createElement('div');
+            div.className='card';
+            div.style.marginBottom='8px';
+            div.innerHTML=`
+                <strong>Order #${o.id}</strong>
+                <div><strong>Name:</strong> ${o.userName}</div>
+                <div><strong>Email:</strong> ${o.userEmail}</div>
+                <div><strong>Phone:</strong> ${o.userPhone || '-'}</div>
+                <div><strong>Pick up time:</strong> ${o.deliveryTime}</div>
+                <div><strong>Items:</strong> ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
+                <div><strong>Total:</strong> ${o.total} OMR</div>
+                <div><strong>Status:</strong>
+                    <select onchange="updateOrderStatusFirebase('${deviceId}', ${o.id}, this.value)">
+                        <option value="Preparing" ${o.status==='Preparing'?'selected':''}>Preparing</option>
+                        <option value="Ready" ${o.status==='Ready'?'selected':''}>Ready</option>
+                        <option value="Completed" ${o.status==='Completed'?'selected':''}>Completed</option>
+                        <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+                    </select>
+                </div>
+            `;
+            list.appendChild(div);
+        });
     });
 }
 
-function updateOrderStatus(orderId, status){
-    const orders = getOrders();
-    const idx = orders.findIndex(o=>o.id===orderId);
-    if(idx===-1) return;
-    orders[idx].status=status;
-    saveOrders(orders);
-    renderAdmin();
-    renderProfile();
-    toast('Order status updated');
-}
-
-function deleteOrder(orderId){
-    const orders = getOrders();
-    const index = orders.findIndex(o => o.id === orderId);
-    if(index === -1) return;
-    orders.splice(index,1);
-    saveOrders(orders);
-    renderAdmin();
-    toast('Order deleted');
-}
-
-function cancelOrder(orderId){
-    const orders = getOrders();
-    const index = orders.findIndex(o=>o.id===orderId);
-    if(index===-1) return;
-    if(orders[index].status==='Completed' || orders[index].status==='Ready'){
-        toast('Order cannot be cancelled');
-        return;
-    }
-    orders[index].status='Cancelled';
-    saveOrders(orders);
-    renderProfile();
-    renderAdmin?.();
-    toast('Order cancelled');
+function updateOrderStatusFirebase(deviceId, orderId, status){
+    const ordersRef = ref(db, 'orders/' + deviceId);
+    get(ordersRef).then(snapshot=>{
+        const ordersData = snapshot.val() || {};
+        const key = Object.keys(ordersData).find(k => ordersData[k].id === orderId);
+        if(key){
+            set(ref(db, 'orders/' + deviceId + '/' + key + '/status'), status);
+            renderAdminFirebase(deviceId);
+            renderProfile();
+            toast('Order status updated');
+        }
+    });
 }
 
 function logout(){
     localStorage.removeItem('smartmeal_user');
     updateProfileLink();
     renderProfile();
-    toast('Logged out');
     if(location.pathname.endsWith('admin.html')) location.href='admin-login.html';
 }
 
@@ -312,9 +307,7 @@ function doLogin(){
     if(location.pathname.endsWith('login.html')) location.href='profile.html';
 }
 
-function toast(msg){ 
-    alert(msg); 
-}
+function toast(msg){ alert(msg); }
 
 window.addEventListener('DOMContentLoaded',()=>{
     updateCartCount();
@@ -322,5 +315,8 @@ window.addEventListener('DOMContentLoaded',()=>{
     renderMenuGrid('all');
     renderCartPage();
     renderProfile();
-    if(location.pathname.endsWith('admin.html')) renderAdmin();
+    if(location.pathname.endsWith('admin.html')){
+        const deviceId = localStorage.getItem('smartmeal_device_id');
+        if(deviceId) renderAdminFirebase(deviceId);
+    }
 });
