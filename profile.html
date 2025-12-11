@@ -41,20 +41,62 @@
     <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
-<script>
-window.addEventListener('DOMContentLoaded', () => {
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
+const firebaseConfig = {
+  // ضع إعدادات Firebase هنا
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+function getUser() { return JSON.parse(localStorage.getItem('smartmeal_user')); }
+function logout() { localStorage.removeItem('smartmeal_user'); window.location.href='login.html'; }
+
+window.addEventListener('DOMContentLoaded', async () => {
     const user = getUser();
-    if (!user) {
-        window.location.href = 'login.html';
-        return;
-    }
+    if(!user){ window.location.href='login.html'; return; }
 
     document.getElementById('headerUsername').innerText = user.name;
     document.getElementById('profileLink').innerText = user.name;
 
-    renderProfile();
+    const profileBox = document.getElementById('profileBox');
+    profileBox.innerHTML = `<p><strong>Name:</strong> ${user.name}</p>
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            <p><strong>Phone:</strong> ${user.phone || 'N/A'}</p>`;
+
+    const orderHistory = document.getElementById('orderHistory');
+    const ordersRef = ref(db, 'orders');
+    onValue(ordersRef, snapshot => {
+        orderHistory.innerHTML='';
+        if(snapshot.exists()){
+            snapshot.forEach(snap=>{
+                const o = snap.val();
+                if(o.userEmail === user.email){
+                    const div = document.createElement('div');
+                    div.classList.add('order-item');
+                    div.innerHTML=`
+                        <h3>Order #${snap.key} - ${o.status}</h3>
+                        <p>${o.items.map(i => `${i.name} x${i.qty}`).join('<br>')}</p>
+                        <p><strong>Total:</strong> ${o.total.toFixed(2)} OMR</p>
+                        ${o.status!=='Cancelled'?`<button class="btn ghost" onclick="cancelOrder('${snap.key}')">Cancel</button>`:''}
+                    `;
+                    orderHistory.appendChild(div);
+                }
+            });
+        } else { orderHistory.innerHTML='<p>No orders yet.</p>'; }
+    });
 });
+
+function cancelOrder(orderId){
+    const orderRef = ref(db, 'orders/' + orderId);
+    get(orderRef).then(snap=>{
+        if(snap.exists()){
+            set(orderRef, {...snap.val(), status:'Cancelled'});
+        }
+    });
+}
 </script>
 </body>
 </html>
