@@ -29,7 +29,7 @@
 
 <main class="container fade-in">
 <h2>Login / Register</h2>
-<form id="loginForm" onsubmit="event.preventDefault(); doLoginFirebase();">
+<form id="loginForm" onsubmit="event.preventDefault(); doLogin();">
 <label>Name</label>
 <input type="text" id="name" placeholder="Your Name" required>
 <label>Email</label>
@@ -49,18 +49,12 @@
 </footer>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-const firebaseConfig = {
-  // ضع إعدادات Firebase هنا
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
+const db = getDatabase();
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 
-window.doLoginFirebase = async function() {
+window.doLogin = async function() {
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
@@ -98,6 +92,10 @@ window.doLoginFirebase = async function() {
         errorEl.innerText = 'Error connecting to database';
     }
 };
+</script>
+<script src="app.js"></script>
+<script>
+updateProfileLink();
 </script>
 </body>
 </html>
