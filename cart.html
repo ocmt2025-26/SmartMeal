@@ -1,63 +1,89 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SmartMeal - Cart</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SmartMeal - Cart</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
 <header class="site-header">
-<div class="brand">
-<div class="logo-box">
-    <img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg" 
-         alt="College Logo" class="header-logo">
-</div>
-<div>
-<h1>SmartMeal</h1>
-<p class="subtitle">Cart</p>
-</div>
-</div>
-<nav class="nav">
-<a href="index.html">Home</a>
-<a href="menu.html">Menu</a>
-<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
-<a href="profile.html" id="profileLink">Account</a>
-</nav>
+    <div class="brand">
+        <div class="logo-box">
+            <img src="https://raw.githubusercontent.com/ocmt2025-26/SmartMeal/main/college.png.jpeg" 
+                 alt="College Logo" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
+        </div>
+        <div>
+            <h1>SmartMeal</h1>
+            <p class="subtitle">Cart</p>
+        </div>
+    </div>
+    <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a class="active" href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+        <a href="profile.html" id="profileLink">Account</a>
+    </nav>
 </header>
 
 <main class="container fade-in">
-<h2>Your Cart</h2>
-<div id="cartContainer" class="cart-container"></div>
 
-<div class="cart-totals">
-  <p>Subtotal: <strong id="subtotal">0.00</strong> OMR</p>
-  <p>Total: <strong id="total">0.00</strong> OMR</p>
-</div>
+    <h2>Your Cart</h2>
 
-<div class="cart-actions">
-  <label for="deliveryTime">Pick-up Time:</label>
-  <input type="time" id="deliveryTime">
-  <label for="paymentMethod">Payment Method:</label>
-  <select id="paymentMethod">
-    <option value="Cash">Cash</option>
-    <option value="Card">Card</option>
-  </select>
-  <button class="btn primary" onclick="confirmOrder()">Confirm Order ✅</button>
-</div>
+    <!-- Cart Items Container -->
+    <div id="cartContainer"></div>
+
+    <!-- Delivery Time -->
+    <div style="margin-top:25px;">
+        <h3>Pick up time</h3>
+        <input type="time" id="deliveryTime" class="time-input">
+    </div>
+
+    <!-- Totals -->
+    <div class="totals" style="margin-top:25px;">
+        <p>Subtotal: <span id="subtotal">0.00</span> OMR</p>
+        <p>Total: <span id="total">0.00</span> OMR</p>
+
+        <div class="payment">
+            <label for="paymentMethod">Payment:</label>
+            <select id="paymentMethod">
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+            </select>
+        </div>
+
+        <div class="actions" style="margin-top:15px;">
+            <button class="btn primary" onclick="confirmOrder()">Confirm Order ✅</button>
+            <button class="btn ghost" onclick="localStorage.removeItem('smartmeal_cart'); renderCartPage(); updateCartCount();">
+                Clear Cart
+            </button>
+        </div>
+    </div>
+
 </main>
 
 <footer class="site-footer">
-<div>Contact: cafeteria@ocmt.edu.om</div>
-<div>© SmartMeal • Terms & Conditions</div>
+    <div>Contact: cafeteria@ocmt.edu.om</div>
+    <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
 <script type="module" src="firebase-init.js"></script>
 <script src="app.js"></script>
 <script>
-updateProfileLink();
-renderCartPage();
+    window.addEventListener("DOMContentLoaded", () => {
+        const user = JSON.parse(localStorage.getItem("smartmeal_user"));
+        if (!user) {
+            location.href = "login.html";
+            return;
+        }
+        updateProfileLink();
+        updateCartCount();
+        renderCartPage();
+    });
 </script>
+
 </body>
 </html>
