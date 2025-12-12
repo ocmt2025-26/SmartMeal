@@ -1,4 +1,3 @@
-// ---- Config ----
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 const TENANT_ID = 'SMARTMEAL';
 
@@ -19,7 +18,7 @@ const MENU = [
 // ---- User Storage ----
 function getUser(){ return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u){ localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
-function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); alert('Logged out'); location.href='index.html'; }
+function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); location.href='index.html'; }
 
 // ---- Profile Link ----
 function updateProfileLink(){
@@ -62,7 +61,7 @@ function doLogin(){
   }
 }
 
-// ---- Cart Storage ----
+// ---- Cart ----
 function getCart(){ return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c){ localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
 function updateCartCount(){ const count = getCart().reduce((s,i)=>s+i.qty,0); const el=document.getElementById('cartCount'); if(el) el.innerText=count; }
@@ -89,13 +88,11 @@ function renderMenuGrid(type='all'){
     grid.appendChild(card);
   });
 }
-
 function filterType(type, el){
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   if(el) el.classList.add('active');
   renderMenuGrid(type);
 }
-
 function viewItem(id){
   const it = MENU.find(m=>m.id===id);
   if(!it) return;
@@ -109,10 +106,8 @@ function addToCart(id){
   const existing = cart.find(c=>c.id===id);
   if(existing) existing.qty+=1; else cart.push({ id:it.id,name:it.name,price:it.price,qty:1 });
   saveCart(cart);
-  alert(`${it.name} added to cart`);
   renderCartPage();
 }
-
 function renderCartPage(){
   const container = document.getElementById('cartContainer');
   if(!container) return;
@@ -138,7 +133,6 @@ function renderCartPage(){
   });
   calculateTotals();
 }
-
 function changeQty(idx, delta){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -147,7 +141,6 @@ function changeQty(idx, delta){
   saveCart(cart);
   renderCartPage();
 }
-
 function removeItem(idx){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -155,7 +148,6 @@ function removeItem(idx){
   saveCart(cart);
   renderCartPage();
 }
-
 function calculateTotals(){
   const cart = getCart();
   const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -201,7 +193,7 @@ async function confirmOrder(){
   } catch(e){ console.error(e); alert('Failed to place order'); }
 }
 
-// ---- User Profile ----
+// ---- Profile / Orders ----
 function renderProfile(){
   const profileBox=document.getElementById('profileBox');
   const orderHistory=document.getElementById('orderHistory');
@@ -216,12 +208,11 @@ function renderProfile(){
   `;
 
   if(orderHistory){
-    const { db, ref, query, orderByChild, equalTo, onValue, update } = window.firebaseDb;
+    const { db, ref, query, orderByChild, equalTo, onValue } = window.firebaseDb;
     const q = query(ref(db,'orders'),orderByChild('userEmail'),equalTo(user.email));
     onValue(q,(snap)=>{
       const data = snap.val() || {};
       const orders = Object.entries(data).map(([id,v])=>({ id,...v })).sort((a,b)=>(a.created>b.created?-1:1));
-      if(orders.length===0){ orderHistory.innerHTML='<p>No orders yet</p>'; return; }
       orderHistory.innerHTML='';
       orders.forEach(o=>{
         const div=document.createElement('div');
@@ -239,6 +230,7 @@ function renderProfile(){
   }
 }
 
+// ---- Cancel Order (User) ----
 async function cancelUserOrder(orderId){
   if(!confirm('Cancel this order?')) return;
   try {
@@ -265,7 +257,6 @@ function renderAdminList(orders){
   const list=document.getElementById('ordersList');
   if(!list) return;
   list.innerHTML='';
-  if(orders.length===0){ list.innerHTML='<p>No orders yet.</p>'; return; }
   orders.forEach(o=>{
     const div=document.createElement('div');
     div.className='card';
@@ -299,7 +290,6 @@ async function updateOrderStatus(orderId,status){
   try { const { db, ref, update } = window.firebaseDb; await update(ref(db,`orders/${orderId}`),{status}); alert('Order status updated'); } 
   catch(e){ console.error(e); alert('Failed to update order'); }
 }
-
 async function deleteOrder(orderId){
   try { const { db, ref, remove } = window.firebaseDb; await remove(ref(db,`orders/${orderId}`)); alert('Order deleted'); } 
   catch(e){ console.error(e); alert('Failed to delete order'); }
