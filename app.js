@@ -15,11 +15,12 @@ const MENU = [
   { id: 11, name: 'Ice Cream 🍦',          price: 0.30, type: 'dessert' }
 ];
 
-// ---------------------- User Storage ----------------------
+// ---- User Storage ----
 function getUser(){ return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u){ localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
-function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); alert('Logged out'); location.href='index.html'; }
+function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); location.href='index.html'; }
 
+// ---- Profile Link ----
 function updateProfileLink(){
   const link = document.getElementById('profileLink');
   const user = getUser();
@@ -27,7 +28,7 @@ function updateProfileLink(){
   link.innerText = user ? user.name : 'Account';
 }
 
-// ---------------------- Login & Registration ----------------------
+// ---- Login / Registration ----
 function doLogin(){
   const name = document.getElementById('name')?.value.trim();
   const email = document.getElementById('email')?.value.trim();
@@ -60,11 +61,12 @@ function doLogin(){
   }
 }
 
-// ---------------------- Cart ----------------------
+// ---- Cart Storage ----
 function getCart(){ return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c){ localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
 function updateCartCount(){ const count = getCart().reduce((s,i)=>s+i.qty,0); const el=document.getElementById('cartCount'); if(el) el.innerText=count; }
 
+// ---- Menu ----
 function renderMenuGrid(type='all'){
   const grid = document.getElementById('menuGrid');
   if(!grid) return;
@@ -86,19 +88,18 @@ function renderMenuGrid(type='all'){
     grid.appendChild(card);
   });
 }
-
 function filterType(type, el){
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   if(el) el.classList.add('active');
   renderMenuGrid(type);
 }
-
 function viewItem(id){
   const it = MENU.find(m=>m.id===id);
   if(!it) return;
   alert(`${it.name} - ${it.price.toFixed(2)} OMR`);
 }
 
+// ---- Cart Functions ----
 function addToCart(id){
   const it = MENU.find(m=>m.id===id); if(!it) return;
   const cart = getCart();
@@ -108,7 +109,6 @@ function addToCart(id){
   alert(`${it.name} added to cart`);
   renderCartPage();
 }
-
 function renderCartPage(){
   const container = document.getElementById('cartContainer');
   if(!container) return;
@@ -134,7 +134,6 @@ function renderCartPage(){
   });
   calculateTotals();
 }
-
 function changeQty(idx, delta){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -143,7 +142,6 @@ function changeQty(idx, delta){
   saveCart(cart);
   renderCartPage();
 }
-
 function removeItem(idx){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -151,7 +149,6 @@ function removeItem(idx){
   saveCart(cart);
   renderCartPage();
 }
-
 function calculateTotals(){
   const cart = getCart();
   const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -162,7 +159,7 @@ function calculateTotals(){
   if(elTot) elTot.innerText=total.toFixed(2);
 }
 
-// ---------------------- Orders ----------------------
+// ---- Confirm Order ----
 async function confirmOrder(){
   const cart = getCart();
   if(cart.length===0){ alert('Your cart is empty'); return; }
@@ -188,8 +185,9 @@ async function confirmOrder(){
   };
 
   try {
+    // ---- إرسال الطلب إلى Firebase (كما كان سابقاً) ----
     const { db, ref, push } = window.firebaseDb;
-    await push(ref(db,'orders'), order);
+    await push(ref(db,'orders'), order);  // ← هذا السطر يضمن نجاح الإرسال
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
@@ -197,7 +195,7 @@ async function confirmOrder(){
   } catch(e){ console.error(e); alert('Failed to place order'); }
 }
 
-// ---------------------- User Profile ----------------------
+// ---- User Profile ----
 function renderProfile(){
   const profileBox=document.getElementById('profileBox');
   const orderHistory=document.getElementById('orderHistory');
@@ -212,7 +210,7 @@ function renderProfile(){
   `;
 
   if(orderHistory){
-    const { db, ref, query, orderByChild, equalTo, onValue, update } = window.firebaseDb;
+    const { db, ref, query, orderByChild, equalTo, onValue } = window.firebaseDb;
     const q = query(ref(db,'orders'),orderByChild('userEmail'),equalTo(user.email));
     onValue(q,(snap)=>{
       const data = snap.val() || {};
@@ -227,7 +225,7 @@ function renderProfile(){
           <div>Pick up time: ${o.deliveryTime}</div>
           <div>${o.items.map(i=>`<div>- ${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</div>`).join('')}</div>
           <div><strong>Total:</strong> ${o.total} OMR</div>
-          ${o.status === 'Preparing' ? `<button class="danger" onclick="cancelUserOrder('${o.id}')">Cancel Order</button>` : ''}
+          ${o.status==='Preparing'?`<button onclick="cancelUserOrder('${o.id}')">Cancel Order</button>`:''}
         `;
         orderHistory.appendChild(div);
       });
@@ -235,15 +233,17 @@ function renderProfile(){
   }
 }
 
+// ---- Cancel Order (User) ----
 async function cancelUserOrder(orderId){
-  const { db, ref, update } = window.firebaseDb;
+  if(!confirm('Cancel this order?')) return;
   try {
+    const { db, ref, update } = window.firebaseDb;
     await update(ref(db,`orders/${orderId}`),{status:'Cancelled'});
-    alert('Order cancelled successfully');
+    alert('Order cancelled');
   } catch(e){ console.error(e); alert('Failed to cancel order'); }
 }
 
-// ---------------------- Admin ----------------------
+// ---- Admin Orders ----
 function listenAdminOrders(tenantId = TENANT_ID){
   const list = document.getElementById('ordersList');
   if(!list) return;
@@ -268,7 +268,12 @@ function renderAdminList(orders){
     div.innerHTML=`
       <div class="row space-between">
         <strong>Order #${o.id}</strong>
-        <span>Status: ${o.status}</span>
+        <select onchange="updateOrderStatus('${o.id}',this.value)">
+          <option ${o.status==='Preparing'?'selected':''}>Preparing</option>
+          <option ${o.status==='Ready'?'selected':''}>Ready</option>
+          <option ${o.status==='Completed'?'selected':''}>Completed</option>
+          <option ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+        </select>
       </div>
       <div>Name: ${o.userName}</div>
       <div>Email: ${o.userEmail}</div>
@@ -277,9 +282,6 @@ function renderAdminList(orders){
       <div>Items: ${o.items.map(i=>i.name+' x'+i.qty).join(', ')}</div>
       <div><strong>Total: ${o.total} OMR</strong></div>
       <div class="row gap-8" style="margin-top:8px">
-        <button onclick="updateOrderStatus('${o.id}','Ready')">Ready</button>
-        <button onclick="updateOrderStatus('${o.id}','Completed')">Completed</button>
-        <button class="secondary" onclick="updateOrderStatus('${o.id}','Cancelled')">Cancelled</button>
         ${['Ready','Completed','Cancelled'].includes(o.status)?`<button class="danger" onclick="deleteOrder('${o.id}')">Delete Order</button>`:''}
       </div>
     `;
@@ -287,17 +289,17 @@ function renderAdminList(orders){
   });
 }
 
+// ---- Admin Actions ----
 async function updateOrderStatus(orderId,status){
   try { const { db, ref, update } = window.firebaseDb; await update(ref(db,`orders/${orderId}`),{status}); alert('Order status updated'); } 
   catch(e){ console.error(e); alert('Failed to update order'); }
 }
-
 async function deleteOrder(orderId){
   try { const { db, ref, remove } = window.firebaseDb; await remove(ref(db,`orders/${orderId}`)); alert('Order deleted'); } 
   catch(e){ console.error(e); alert('Failed to delete order'); }
 }
 
-// ---------------------- Init ----------------------
+// ---- Init ----
 window.addEventListener('DOMContentLoaded',()=>{
   updateCartCount();
   updateProfileLink();
