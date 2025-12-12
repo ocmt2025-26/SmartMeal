@@ -15,10 +15,10 @@ const MENU = [
   { id: 11, name: 'Ice Cream 🍦',          price: 0.30, type: 'dessert' }
 ];
 
-// --------- User Management ----------
+// ---------------------- User Storage ----------------------
 function getUser(){ return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
-function saveUser(u){ localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); renderProfile(); }
-function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); renderProfile(); alert('Logged out'); location.href='index.html'; }
+function saveUser(u){ localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
+function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); alert('Logged out'); location.href='index.html'; }
 
 function updateProfileLink(){
   const link = document.getElementById('profileLink');
@@ -27,6 +27,7 @@ function updateProfileLink(){
   link.innerText = user ? user.name : 'Account';
 }
 
+// ---------------------- Login & Registration ----------------------
 function doLogin(){
   const name = document.getElementById('name')?.value.trim();
   const email = document.getElementById('email')?.value.trim();
@@ -59,10 +60,44 @@ function doLogin(){
   }
 }
 
-// --------- Cart ----------
+// ---------------------- Cart ----------------------
 function getCart(){ return JSON.parse(localStorage.getItem('smartmeal_cart') || '[]'); }
 function saveCart(c){ localStorage.setItem('smartmeal_cart', JSON.stringify(c)); updateCartCount(); }
 function updateCartCount(){ const count = getCart().reduce((s,i)=>s+i.qty,0); const el=document.getElementById('cartCount'); if(el) el.innerText=count; }
+
+function renderMenuGrid(type='all'){
+  const grid = document.getElementById('menuGrid');
+  if(!grid) return;
+  grid.innerHTML='';
+  const items = MENU.filter(i => type==='all'?true:i.type===type);
+  items.forEach(it=>{
+    const card = document.createElement('div');
+    card.className='card menu-item';
+    card.innerHTML=`
+      <div class="row space-between">
+        <h4>${it.name}</h4>
+        <strong>${it.price.toFixed(2)} OMR</strong>
+      </div>
+      <div class="row gap-8">
+        <button onclick="addToCart(${it.id})">Add to Cart</button>
+        <button class="secondary" onclick="viewItem(${it.id})">View</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterType(type, el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderMenuGrid(type);
+}
+
+function viewItem(id){
+  const it = MENU.find(m=>m.id===id);
+  if(!it) return;
+  alert(`${it.name} - ${it.price.toFixed(2)} OMR`);
+}
 
 function addToCart(id){
   const it = MENU.find(m=>m.id===id); if(!it) return;
@@ -72,6 +107,32 @@ function addToCart(id){
   saveCart(cart);
   alert(`${it.name} added to cart`);
   renderCartPage();
+}
+
+function renderCartPage(){
+  const container = document.getElementById('cartContainer');
+  if(!container) return;
+  const cart = getCart();
+  container.innerHTML='';
+  if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; calculateTotals(); return; }
+  cart.forEach((item, idx)=>{
+    const div = document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`
+      <div class="row space-between">
+        <div><strong>${item.name}</strong></div>
+        <div>${item.price.toFixed(2)} OMR</div>
+      </div>
+      <div class="row gap-8 align-center">
+        <button onclick="changeQty(${idx},-1)">-</button>
+        <span>${item.qty}</span>
+        <button onclick="changeQty(${idx},1)">+</button>
+        <button class="danger" onclick="removeItem(${idx})">Remove</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  calculateTotals();
 }
 
 function changeQty(idx, delta){
@@ -101,46 +162,42 @@ function calculateTotals(){
   if(elTot) elTot.innerText=total.toFixed(2);
 }
 
-// --------- Render Menu ----------
-function renderMenuGrid(type='all'){
-  const grid = document.getElementById('menuGrid');
-  if(!grid) return;
-  grid.innerHTML='';
-  const items = MENU.filter(i => type==='all'?true:i.type===type);
-  items.forEach(it=>{
-    const card = document.createElement('div');
-    card.className='card menu-item';
-    card.style.border='1px solid #ddd';
-    card.style.padding='10px';
-    card.style.margin='5px';
-    card.style.borderRadius='6px';
-    card.innerHTML=`
-      <div class="row space-between">
-        <h4>${it.name}</h4>
-        <strong>${it.price.toFixed(2)} OMR</strong>
-      </div>
-      <div class="row gap-8">
-        <button onclick="addToCart(${it.id})" style="background:#4CAF50;color:white;border:none;padding:5px 10px;border-radius:4px;">Add to Cart</button>
-        <button class="secondary" onclick="viewItem(${it.id})" style="border:1px solid #aaa;padding:5px 10px;border-radius:4px;">View</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+// ---------------------- Orders ----------------------
+async function confirmOrder(){
+  const cart = getCart();
+  if(cart.length===0){ alert('Your cart is empty'); return; }
+  const user = getUser();
+  if(!user){ alert('Please login first'); return; }
+  const deliveryTime = document.getElementById('deliveryTime')?.value || 'Not selected';
+  const payment = document.getElementById('paymentMethod')?.value || 'Cash';
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const total = subtotal.toFixed(2);
+
+  const order = {
+    userName: user.name,
+    userEmail: user.email,
+    userPhone: user.phone,
+    items: cart,
+    subtotal,
+    total,
+    payment,
+    deliveryTime,
+    created: new Date().toISOString(),
+    status: 'Preparing',
+    tenantId: TENANT_ID
+  };
+
+  try {
+    const { db, ref, push } = window.firebaseDb;
+    await push(ref(db,'orders'), order);
+    localStorage.removeItem('smartmeal_cart');
+    updateCartCount();
+    renderCartPage();
+    alert('Order placed! Pick up at ' + deliveryTime);
+  } catch(e){ console.error(e); alert('Failed to place order'); }
 }
 
-function filterType(type, el){
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-  if(el) el.classList.add('active');
-  renderMenuGrid(type);
-}
-
-function viewItem(id){
-  const it = MENU.find(m=>m.id===id);
-  if(!it) return;
-  alert(`${it.name} - ${it.price.toFixed(2)} OMR`);
-}
-
-// --------- Profile ----------
+// ---------------------- User Profile ----------------------
 function renderProfile(){
   const profileBox=document.getElementById('profileBox');
   const orderHistory=document.getElementById('orderHistory');
@@ -155,7 +212,7 @@ function renderProfile(){
   `;
 
   if(orderHistory){
-    const { db, ref, query, orderByChild, equalTo, onValue } = window.firebaseDb;
+    const { db, ref, query, orderByChild, equalTo, onValue, update } = window.firebaseDb;
     const q = query(ref(db,'orders'),orderByChild('userEmail'),equalTo(user.email));
     onValue(q,(snap)=>{
       const data = snap.val() || {};
@@ -170,6 +227,7 @@ function renderProfile(){
           <div>Pick up time: ${o.deliveryTime}</div>
           <div>${o.items.map(i=>`<div>- ${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</div>`).join('')}</div>
           <div><strong>Total:</strong> ${o.total} OMR</div>
+          ${o.status === 'Preparing' ? `<button class="danger" onclick="cancelUserOrder('${o.id}')">Cancel Order</button>` : ''}
         `;
         orderHistory.appendChild(div);
       });
@@ -177,7 +235,15 @@ function renderProfile(){
   }
 }
 
-// --------- Admin ----------
+async function cancelUserOrder(orderId){
+  const { db, ref, update } = window.firebaseDb;
+  try {
+    await update(ref(db,`orders/${orderId}`),{status:'Cancelled'});
+    alert('Order cancelled successfully');
+  } catch(e){ console.error(e); alert('Failed to cancel order'); }
+}
+
+// ---------------------- Admin ----------------------
 function listenAdminOrders(tenantId = TENANT_ID){
   const list = document.getElementById('ordersList');
   if(!list) return;
@@ -231,7 +297,7 @@ async function deleteOrder(orderId){
   catch(e){ console.error(e); alert('Failed to delete order'); }
 }
 
-// --------- On Load ----------
+// ---------------------- Init ----------------------
 window.addEventListener('DOMContentLoaded',()=>{
   updateCartCount();
   updateProfileLink();
