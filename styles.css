@@ -17,6 +17,10 @@ a {
 :root {
     --blue: #0033A0;
     --red: #C8102E;
+    --green: #4CAF50;
+    --yellow: #fff8c4;
+    --lightgreen: #d4f8d4;
+    --lightred: #f8d4d4;
     --black: #000;
     --white: #fff;
 }
@@ -114,6 +118,21 @@ a {
     border: 2px solid var(--blue);
 }
 
+.btn.danger {
+    background: var(--red);
+    color: var(--white);
+}
+
+.btn.secondary {
+    background: #ddd;
+    color: #111;
+}
+
+.btn.add {
+    background: var(--green);
+    color: var(--white);
+}
+
 .filters,
 .chips {
     display: flex;
@@ -150,6 +169,7 @@ a {
     flex-direction: column;
     gap: 8px;
     transition: transform .18s ease, box-shadow .18s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .card img {
@@ -164,9 +184,9 @@ a {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.card .price {
-    font-weight: 800;
-}
+.menu-item.main { background-color: #f0f8ff; }
+.menu-item.drinks { background-color: #fff0f5; }
+.menu-item.dessert { background-color: #fffaf0; }
 
 .cart-container {
     display: flex;
@@ -230,11 +250,24 @@ select {
 }
 
 .profile-box {
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #eee;
-    border-radius: 8px;
+    border-radius: 10px;
     background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
 }
+
+.order-item {
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.order-item.Preparing { background-color: var(--yellow); }
+.order-item.Ready { background-color: var(--lightgreen); }
+.order-item.Cancelled { background-color: var(--lightred); }
 
 .site-footer {
     background: #000;
