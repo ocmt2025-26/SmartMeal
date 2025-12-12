@@ -1,3 +1,4 @@
+// ---- Config ----
 const ADMIN_CREDENTIALS = { email: "admin@ocmt.edu.om", password: "admin123" };
 const TENANT_ID = 'SMARTMEAL';
 
@@ -18,7 +19,7 @@ const MENU = [
 // ---- User Storage ----
 function getUser(){ return JSON.parse(localStorage.getItem('smartmeal_user') || 'null'); }
 function saveUser(u){ localStorage.setItem('smartmeal_user', JSON.stringify(u)); updateProfileLink(); }
-function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); location.href='index.html'; }
+function logout(){ localStorage.removeItem('smartmeal_user'); updateProfileLink(); alert('Logged out'); location.href='index.html'; }
 
 // ---- Profile Link ----
 function updateProfileLink(){
@@ -88,11 +89,13 @@ function renderMenuGrid(type='all'){
     grid.appendChild(card);
   });
 }
+
 function filterType(type, el){
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   if(el) el.classList.add('active');
   renderMenuGrid(type);
 }
+
 function viewItem(id){
   const it = MENU.find(m=>m.id===id);
   if(!it) return;
@@ -109,6 +112,7 @@ function addToCart(id){
   alert(`${it.name} added to cart`);
   renderCartPage();
 }
+
 function renderCartPage(){
   const container = document.getElementById('cartContainer');
   if(!container) return;
@@ -134,6 +138,7 @@ function renderCartPage(){
   });
   calculateTotals();
 }
+
 function changeQty(idx, delta){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -142,6 +147,7 @@ function changeQty(idx, delta){
   saveCart(cart);
   renderCartPage();
 }
+
 function removeItem(idx){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -149,6 +155,7 @@ function removeItem(idx){
   saveCart(cart);
   renderCartPage();
 }
+
 function calculateTotals(){
   const cart = getCart();
   const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -185,9 +192,8 @@ async function confirmOrder(){
   };
 
   try {
-    // ---- إرسال الطلب إلى Firebase (كما كان سابقاً) ----
     const { db, ref, push } = window.firebaseDb;
-    await push(ref(db,'orders'), order);  // ← هذا السطر يضمن نجاح الإرسال
+    await push(ref(db,'orders'), order);
     localStorage.removeItem('smartmeal_cart');
     updateCartCount();
     renderCartPage();
@@ -210,7 +216,7 @@ function renderProfile(){
   `;
 
   if(orderHistory){
-    const { db, ref, query, orderByChild, equalTo, onValue } = window.firebaseDb;
+    const { db, ref, query, orderByChild, equalTo, onValue, update } = window.firebaseDb;
     const q = query(ref(db,'orders'),orderByChild('userEmail'),equalTo(user.email));
     onValue(q,(snap)=>{
       const data = snap.val() || {};
@@ -233,7 +239,6 @@ function renderProfile(){
   }
 }
 
-// ---- Cancel Order (User) ----
 async function cancelUserOrder(orderId){
   if(!confirm('Cancel this order?')) return;
   try {
@@ -294,6 +299,7 @@ async function updateOrderStatus(orderId,status){
   try { const { db, ref, update } = window.firebaseDb; await update(ref(db,`orders/${orderId}`),{status}); alert('Order status updated'); } 
   catch(e){ console.error(e); alert('Failed to update order'); }
 }
+
 async function deleteOrder(orderId){
   try { const { db, ref, remove } = window.firebaseDb; await remove(ref(db,`orders/${orderId}`)); alert('Order deleted'); } 
   catch(e){ console.error(e); alert('Failed to delete order'); }
