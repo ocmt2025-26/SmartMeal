@@ -75,24 +75,27 @@ function renderMenuGrid(type='all'){
   items.forEach(it=>{
     const card = document.createElement('div');
     card.className='card menu-item';
+    card.dataset.type = it.type;
     card.innerHTML=`
       <div class="row space-between">
         <h4>${it.name}</h4>
         <strong>${it.price.toFixed(2)} OMR</strong>
       </div>
       <div class="row gap-8">
-        <button onclick="addToCart(${it.id})">Add to Cart</button>
+        <button class="add" onclick="addToCart(${it.id})">Add to Cart</button>
         <button class="secondary" onclick="viewItem(${it.id})">View</button>
       </div>
     `;
     grid.appendChild(card);
   });
 }
+
 function filterType(type, el){
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   if(el) el.classList.add('active');
   renderMenuGrid(type);
 }
+
 function viewItem(id){
   const it = MENU.find(m=>m.id===id);
   if(!it) return;
@@ -107,7 +110,11 @@ function addToCart(id){
   if(existing) existing.qty+=1; else cart.push({ id:it.id,name:it.name,price:it.price,qty:1 });
   saveCart(cart);
   renderCartPage();
+
+  const deliveryTime = document.getElementById('deliveryTime')?.value || 'Not selected';
+  alert(`${it.name} added to cart\nPick up at: ${deliveryTime}`);
 }
+
 function renderCartPage(){
   const container = document.getElementById('cartContainer');
   if(!container) return;
@@ -116,7 +123,7 @@ function renderCartPage(){
   if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; calculateTotals(); return; }
   cart.forEach((item, idx)=>{
     const div = document.createElement('div');
-    div.className='cart-item';
+    div.className='cart-item card';
     div.innerHTML=`
       <div class="row space-between">
         <div><strong>${item.name}</strong></div>
@@ -133,6 +140,7 @@ function renderCartPage(){
   });
   calculateTotals();
 }
+
 function changeQty(idx, delta){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -141,6 +149,7 @@ function changeQty(idx, delta){
   saveCart(cart);
   renderCartPage();
 }
+
 function removeItem(idx){
   const cart = getCart();
   if(!cart[idx]) return;
@@ -148,6 +157,7 @@ function removeItem(idx){
   saveCart(cart);
   renderCartPage();
 }
+
 function calculateTotals(){
   const cart = getCart();
   const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -200,11 +210,14 @@ function renderProfile(){
   const user=getUser();
   if(!profileBox) return;
   if(!user){ profileBox.innerHTML='<p>Please login to view profile</p>'; if(orderHistory) orderHistory.innerHTML=''; return; }
+
   profileBox.innerHTML=`
-    <p><strong>Name:</strong> ${user.name}</p>
-    <p><strong>Email:</strong> ${user.email}</p>
-    <p><strong>Phone:</strong> ${user.phone||'-'}</p>
-    <button onclick="logout()">Logout</button>
+    <div class="card">
+      <p><strong>Name:</strong> ${user.name}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Phone:</strong> ${user.phone||'-'}</p>
+      <button onclick="logout()" class="danger">Logout</button>
+    </div>
   `;
 
   if(orderHistory){
@@ -216,13 +229,16 @@ function renderProfile(){
       orderHistory.innerHTML='';
       orders.forEach(o=>{
         const div=document.createElement('div');
-        div.className='order-item';
+        div.className='order-item card';
+        div.dataset.status = o.status;
         div.innerHTML=`
-          <div><strong>Order #${o.id}</strong> - ${o.status}</div>
+          <div class="row space-between">
+            <strong>Order #${o.id}</strong> - ${o.status}
+          </div>
           <div>Pick up time: ${o.deliveryTime}</div>
           <div>${o.items.map(i=>`<div>- ${i.name} x ${i.qty} - ${i.price.toFixed(2)} OMR</div>`).join('')}</div>
           <div><strong>Total:</strong> ${o.total} OMR</div>
-          ${o.status==='Preparing'?`<button onclick="cancelUserOrder('${o.id}')">Cancel Order</button>`:''}
+          ${o.status==='Preparing'?`<button class="danger" onclick="cancelUserOrder('${o.id}')">Cancel Order</button>`:''}
         `;
         orderHistory.appendChild(div);
       });
@@ -260,6 +276,7 @@ function renderAdminList(orders){
   orders.forEach(o=>{
     const div=document.createElement('div');
     div.className='card';
+    div.dataset.status = o.status;
     div.style.marginBottom='8px';
     div.innerHTML=`
       <div class="row space-between">
