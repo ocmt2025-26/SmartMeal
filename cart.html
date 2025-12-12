@@ -68,8 +68,9 @@
   <div>© SmartMeal • Terms & Conditions</div>
 </footer>
 
-<script src="app.js"></script>
 
+<script type="module" src="firebase-init.js"></script>
+<script src="app.js"></script>
 <script>
   window.addEventListener("DOMContentLoaded", () => {
     const user = JSON.parse(localStorage.getItem("smartmeal_user"));
