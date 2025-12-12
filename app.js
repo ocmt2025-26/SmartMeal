@@ -101,15 +101,26 @@ function viewItem(id){
 
 // ---- Cart Functions ----
 function addToCart(id){
-  const it = MENU.find(m=>m.id===id); if(!it) return;
+  const it = MENU.find(m => m.id === id); 
+  if(!it) return;
+
   const cart = getCart();
-  const existing = cart.find(c=>c.id===id);
-  if(existing) existing.qty+=1; else cart.push({ id:it.id,name:it.name,price:it.price,qty:1 });
+  const existing = cart.find(c => c.id === id);
+  if(existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ id: it.id, name: it.name, price: it.price, qty: 1 });
+  }
+
   saveCart(cart);
   renderCartPage();
-  const deliveryTime = document.getElementById('deliveryTime')?.value || 'Not selected';
-  alert(`${it.name} added to cart. Pick up at ${deliveryTime}`);
+
+  const deliveryTimeEl = document.getElementById('deliveryTime');
+  const deliveryTime = deliveryTimeEl && deliveryTimeEl.value ? ` Pick up at ${deliveryTimeEl.value}` : '';
+  
+  alert(`${it.name} added to cart.${deliveryTime}`);
 }
+
 function renderCartPage(){
   const container = document.getElementById('cartContainer');
   if(!container) return;
